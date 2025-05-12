@@ -41,6 +41,8 @@ export const registerUser = asyncHandler(async (req, res) => {
 
   res.cookie("jwt", token, COOKIE_OPTIONS);
 
+  
+
   return res.status(201).json(
     new ApiResponse(
       201,

@@ -2,7 +2,8 @@ import express, { urlencoded } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import authRoutes from "./src/routes/auth.routes.js";
+import authRoutes from "./routes/auth.routes.js";
+import problemRoutes from "./routes/problem.routes.js";
 
 dotenv.config({
   path: "./.env",
@@ -20,6 +21,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/problems", problemRoutes);
 
 app.listen(process.env.PORT, () => {
   console.log(`Server is running on port ${PORT}`);
