@@ -89,13 +89,13 @@ export const getAllProblems = asyncHandler(async (req, res) => {
 export const getProblemsById = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  const problem = await db.problem.findUnique({
+  const problems = await db.problem.findUnique({
     where: {
       id,
     },
   });
 
-  if (!problem) {
+  if (!problems) {
     throw new ApiError(404, "Problem not found");
   }
 
@@ -174,7 +174,7 @@ export const updateProblemById = asyncHandler(async (req, res) => {
   });
   res
     .status(201)
-    .json(new ApiResponse(201, newProblem, "Problem created successfully"));
+    .json(new ApiResponse(201, newProblem, "Problem updated successfully"));
 });
 
 export const deleteProblem = asyncHandler(async (req, res) => {
