@@ -29,12 +29,12 @@ model User {
   id                      String    @id @default(uuid())
   name                    String?
   email                   String    @unique
-  password                String // Consider hashing before saving
+  password                String 
   avatar                  String?
   role                    UserRole  @default(USER)
-  refreshToken            String? // Optional if not always issued
+  refreshToken            String? 
   isEmailVerified         Boolean   @default(false)
-  emailVerificationToken  String? // Optional for inactive users
+  emailVerificationToken  String?
   emailVerificationExpiry DateTime?
   forgotPasswordToken     String?
   forgotPasswordExpiry    DateTime?
@@ -43,8 +43,6 @@ model User {
 
   // Relations
   problems Problem[]
-
-  @@index([email])
 }
 
 model Problem {

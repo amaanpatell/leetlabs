@@ -22,14 +22,11 @@ export const createProblem = asyncHandler(async (req, res) => {
   } = req.body;
 
   if (req.user.role !== "ADMIN") {
-    return res
-      .status(403)
-      .json(new ApiError(403, "You are not allowed to create a problem"));
+    throw new ApiError(403, "You are not allowed to create a problem");
   }
 
   for (const [language, solutionCode] of Object.entries(referenceSolutions)) {
     const languageId = getJudge0LanguageId(language);
-
     if (!languageId) {
       throw new ApiError(400, `${language} Language is not supported`);
     }
@@ -42,9 +39,7 @@ export const createProblem = asyncHandler(async (req, res) => {
     }));
 
     const submissionResults = await submitBatch(submissions);
-
     const tokens = submissionResults.map((res) => res.token);
-
     const results = await pollBatchResults(tokens);
 
     for (let i = 0; i < results.length; i++) {
@@ -58,24 +53,26 @@ export const createProblem = asyncHandler(async (req, res) => {
         );
       }
     }
-
-    const newProblem = await db.problem.create({
-      data: {
-        title,
-        description,
-        difficulty,
-        tags,
-        examples,
-        constraints,
-        testCases,
-        codeSnippets,
-        referenceSolutions,
-        userId: req.user.id,
-      },
-    });
-
-    res.status(201).json(new ApiResponse(201, newProblem));
   }
+
+  const newProblem = await db.problem.create({
+    data: {
+      title,
+      description,
+      difficulty,
+      tags,
+      examples,
+      constraints,
+      testCases,
+      codeSnippets,
+      referenceSolutions,
+      userId: req.user.id,
+    },
+  });
+
+  res
+    .status(201)
+    .json(new ApiResponse(201, newProblem, "Problem created successfully"));
 });
 
 export const getAllProblems = asyncHandler(async (req, res) => {});

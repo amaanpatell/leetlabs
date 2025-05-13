@@ -1038,7 +1038,7 @@ export namespace Prisma {
     avatar: string | null
     role: $Enums.UserRole | null
     refreshToken: string | null
-    isEmailVerified: string | null
+    isEmailVerified: boolean | null
     emailVerificationToken: string | null
     emailVerificationExpiry: Date | null
     forgotPasswordToken: string | null
@@ -1055,7 +1055,7 @@ export namespace Prisma {
     avatar: string | null
     role: $Enums.UserRole | null
     refreshToken: string | null
-    isEmailVerified: string | null
+    isEmailVerified: boolean | null
     emailVerificationToken: string | null
     emailVerificationExpiry: Date | null
     forgotPasswordToken: string | null
@@ -1214,12 +1214,12 @@ export namespace Prisma {
     password: string
     avatar: string | null
     role: $Enums.UserRole
-    refreshToken: string
-    isEmailVerified: string
-    emailVerificationToken: string
-    emailVerificationExpiry: Date
-    forgotPasswordToken: string
-    forgotPasswordExpiry: Date
+    refreshToken: string | null
+    isEmailVerified: boolean
+    emailVerificationToken: string | null
+    emailVerificationExpiry: Date | null
+    forgotPasswordToken: string | null
+    forgotPasswordExpiry: Date | null
     createdAt: Date
     updatedAt: Date
     _count: UserCountAggregateOutputType | null
@@ -1331,12 +1331,12 @@ export namespace Prisma {
       password: string
       avatar: string | null
       role: $Enums.UserRole
-      refreshToken: string
-      isEmailVerified: string
-      emailVerificationToken: string
-      emailVerificationExpiry: Date
-      forgotPasswordToken: string
-      forgotPasswordExpiry: Date
+      refreshToken: string | null
+      isEmailVerified: boolean
+      emailVerificationToken: string | null
+      emailVerificationExpiry: Date | null
+      forgotPasswordToken: string | null
+      forgotPasswordExpiry: Date | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["user"]>
@@ -1770,7 +1770,7 @@ export namespace Prisma {
     readonly avatar: FieldRef<"User", 'String'>
     readonly role: FieldRef<"User", 'UserRole'>
     readonly refreshToken: FieldRef<"User", 'String'>
-    readonly isEmailVerified: FieldRef<"User", 'String'>
+    readonly isEmailVerified: FieldRef<"User", 'Boolean'>
     readonly emailVerificationToken: FieldRef<"User", 'String'>
     readonly emailVerificationExpiry: FieldRef<"User", 'DateTime'>
     readonly forgotPasswordToken: FieldRef<"User", 'String'>
@@ -3504,6 +3504,13 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+  /**
    * Reference to a field of type 'DateTime'
    */
   export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -3572,12 +3579,12 @@ export namespace Prisma {
     password?: StringFilter<"User"> | string
     avatar?: StringNullableFilter<"User"> | string | null
     role?: EnumUserRoleFilter<"User"> | $Enums.UserRole
-    refreshToken?: StringFilter<"User"> | string
-    isEmailVerified?: StringFilter<"User"> | string
-    emailVerificationToken?: StringFilter<"User"> | string
-    emailVerificationExpiry?: DateTimeFilter<"User"> | Date | string
-    forgotPasswordToken?: StringFilter<"User"> | string
-    forgotPasswordExpiry?: DateTimeFilter<"User"> | Date | string
+    refreshToken?: StringNullableFilter<"User"> | string | null
+    isEmailVerified?: BoolFilter<"User"> | boolean
+    emailVerificationToken?: StringNullableFilter<"User"> | string | null
+    emailVerificationExpiry?: DateTimeNullableFilter<"User"> | Date | string | null
+    forgotPasswordToken?: StringNullableFilter<"User"> | string | null
+    forgotPasswordExpiry?: DateTimeNullableFilter<"User"> | Date | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     problems?: ProblemListRelationFilter
@@ -3590,12 +3597,12 @@ export namespace Prisma {
     password?: SortOrder
     avatar?: SortOrderInput | SortOrder
     role?: SortOrder
-    refreshToken?: SortOrder
+    refreshToken?: SortOrderInput | SortOrder
     isEmailVerified?: SortOrder
-    emailVerificationToken?: SortOrder
-    emailVerificationExpiry?: SortOrder
-    forgotPasswordToken?: SortOrder
-    forgotPasswordExpiry?: SortOrder
+    emailVerificationToken?: SortOrderInput | SortOrder
+    emailVerificationExpiry?: SortOrderInput | SortOrder
+    forgotPasswordToken?: SortOrderInput | SortOrder
+    forgotPasswordExpiry?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     problems?: ProblemOrderByRelationAggregateInput
@@ -3611,12 +3618,12 @@ export namespace Prisma {
     password?: StringFilter<"User"> | string
     avatar?: StringNullableFilter<"User"> | string | null
     role?: EnumUserRoleFilter<"User"> | $Enums.UserRole
-    refreshToken?: StringFilter<"User"> | string
-    isEmailVerified?: StringFilter<"User"> | string
-    emailVerificationToken?: StringFilter<"User"> | string
-    emailVerificationExpiry?: DateTimeFilter<"User"> | Date | string
-    forgotPasswordToken?: StringFilter<"User"> | string
-    forgotPasswordExpiry?: DateTimeFilter<"User"> | Date | string
+    refreshToken?: StringNullableFilter<"User"> | string | null
+    isEmailVerified?: BoolFilter<"User"> | boolean
+    emailVerificationToken?: StringNullableFilter<"User"> | string | null
+    emailVerificationExpiry?: DateTimeNullableFilter<"User"> | Date | string | null
+    forgotPasswordToken?: StringNullableFilter<"User"> | string | null
+    forgotPasswordExpiry?: DateTimeNullableFilter<"User"> | Date | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     problems?: ProblemListRelationFilter
@@ -3629,12 +3636,12 @@ export namespace Prisma {
     password?: SortOrder
     avatar?: SortOrderInput | SortOrder
     role?: SortOrder
-    refreshToken?: SortOrder
+    refreshToken?: SortOrderInput | SortOrder
     isEmailVerified?: SortOrder
-    emailVerificationToken?: SortOrder
-    emailVerificationExpiry?: SortOrder
-    forgotPasswordToken?: SortOrder
-    forgotPasswordExpiry?: SortOrder
+    emailVerificationToken?: SortOrderInput | SortOrder
+    emailVerificationExpiry?: SortOrderInput | SortOrder
+    forgotPasswordToken?: SortOrderInput | SortOrder
+    forgotPasswordExpiry?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
@@ -3652,12 +3659,12 @@ export namespace Prisma {
     password?: StringWithAggregatesFilter<"User"> | string
     avatar?: StringNullableWithAggregatesFilter<"User"> | string | null
     role?: EnumUserRoleWithAggregatesFilter<"User"> | $Enums.UserRole
-    refreshToken?: StringWithAggregatesFilter<"User"> | string
-    isEmailVerified?: StringWithAggregatesFilter<"User"> | string
-    emailVerificationToken?: StringWithAggregatesFilter<"User"> | string
-    emailVerificationExpiry?: DateTimeWithAggregatesFilter<"User"> | Date | string
-    forgotPasswordToken?: StringWithAggregatesFilter<"User"> | string
-    forgotPasswordExpiry?: DateTimeWithAggregatesFilter<"User"> | Date | string
+    refreshToken?: StringNullableWithAggregatesFilter<"User"> | string | null
+    isEmailVerified?: BoolWithAggregatesFilter<"User"> | boolean
+    emailVerificationToken?: StringNullableWithAggregatesFilter<"User"> | string | null
+    emailVerificationExpiry?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+    forgotPasswordToken?: StringNullableWithAggregatesFilter<"User"> | string | null
+    forgotPasswordExpiry?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
@@ -3774,12 +3781,12 @@ export namespace Prisma {
     password: string
     avatar?: string | null
     role?: $Enums.UserRole
-    refreshToken: string
-    isEmailVerified: string
-    emailVerificationToken: string
-    emailVerificationExpiry: Date | string
-    forgotPasswordToken: string
-    forgotPasswordExpiry: Date | string
+    refreshToken?: string | null
+    isEmailVerified?: boolean
+    emailVerificationToken?: string | null
+    emailVerificationExpiry?: Date | string | null
+    forgotPasswordToken?: string | null
+    forgotPasswordExpiry?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     problems?: ProblemCreateNestedManyWithoutUserInput
@@ -3792,12 +3799,12 @@ export namespace Prisma {
     password: string
     avatar?: string | null
     role?: $Enums.UserRole
-    refreshToken: string
-    isEmailVerified: string
-    emailVerificationToken: string
-    emailVerificationExpiry: Date | string
-    forgotPasswordToken: string
-    forgotPasswordExpiry: Date | string
+    refreshToken?: string | null
+    isEmailVerified?: boolean
+    emailVerificationToken?: string | null
+    emailVerificationExpiry?: Date | string | null
+    forgotPasswordToken?: string | null
+    forgotPasswordExpiry?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     problems?: ProblemUncheckedCreateNestedManyWithoutUserInput
@@ -3810,12 +3817,12 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-    refreshToken?: StringFieldUpdateOperationsInput | string
-    isEmailVerified?: StringFieldUpdateOperationsInput | string
-    emailVerificationToken?: StringFieldUpdateOperationsInput | string
-    emailVerificationExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
-    forgotPasswordToken?: StringFieldUpdateOperationsInput | string
-    forgotPasswordExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
+    emailVerificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerificationExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    forgotPasswordToken?: NullableStringFieldUpdateOperationsInput | string | null
+    forgotPasswordExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     problems?: ProblemUpdateManyWithoutUserNestedInput
@@ -3828,12 +3835,12 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-    refreshToken?: StringFieldUpdateOperationsInput | string
-    isEmailVerified?: StringFieldUpdateOperationsInput | string
-    emailVerificationToken?: StringFieldUpdateOperationsInput | string
-    emailVerificationExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
-    forgotPasswordToken?: StringFieldUpdateOperationsInput | string
-    forgotPasswordExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
+    emailVerificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerificationExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    forgotPasswordToken?: NullableStringFieldUpdateOperationsInput | string | null
+    forgotPasswordExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     problems?: ProblemUncheckedUpdateManyWithoutUserNestedInput
@@ -3846,12 +3853,12 @@ export namespace Prisma {
     password: string
     avatar?: string | null
     role?: $Enums.UserRole
-    refreshToken: string
-    isEmailVerified: string
-    emailVerificationToken: string
-    emailVerificationExpiry: Date | string
-    forgotPasswordToken: string
-    forgotPasswordExpiry: Date | string
+    refreshToken?: string | null
+    isEmailVerified?: boolean
+    emailVerificationToken?: string | null
+    emailVerificationExpiry?: Date | string | null
+    forgotPasswordToken?: string | null
+    forgotPasswordExpiry?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -3863,12 +3870,12 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-    refreshToken?: StringFieldUpdateOperationsInput | string
-    isEmailVerified?: StringFieldUpdateOperationsInput | string
-    emailVerificationToken?: StringFieldUpdateOperationsInput | string
-    emailVerificationExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
-    forgotPasswordToken?: StringFieldUpdateOperationsInput | string
-    forgotPasswordExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
+    emailVerificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerificationExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    forgotPasswordToken?: NullableStringFieldUpdateOperationsInput | string | null
+    forgotPasswordExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -3880,12 +3887,12 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-    refreshToken?: StringFieldUpdateOperationsInput | string
-    isEmailVerified?: StringFieldUpdateOperationsInput | string
-    emailVerificationToken?: StringFieldUpdateOperationsInput | string
-    emailVerificationExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
-    forgotPasswordToken?: StringFieldUpdateOperationsInput | string
-    forgotPasswordExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
+    emailVerificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerificationExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    forgotPasswordToken?: NullableStringFieldUpdateOperationsInput | string | null
+    forgotPasswordExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -4052,6 +4059,22 @@ export namespace Prisma {
     not?: NestedEnumUserRoleFilter<$PrismaModel> | $Enums.UserRole
   }
 
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type DateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -4173,6 +4196,28 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumUserRoleFilter<$PrismaModel>
     _max?: NestedEnumUserRoleFilter<$PrismaModel>
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -4338,6 +4383,14 @@ export namespace Prisma {
     set?: $Enums.UserRole
   }
 
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
+  }
+
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
+  }
+
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
   }
@@ -4432,6 +4485,22 @@ export namespace Prisma {
     not?: NestedEnumUserRoleFilter<$PrismaModel> | $Enums.UserRole
   }
 
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
   export type NestedDateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -4507,6 +4576,28 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumUserRoleFilter<$PrismaModel>
     _max?: NestedEnumUserRoleFilter<$PrismaModel>
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -4651,12 +4742,12 @@ export namespace Prisma {
     password: string
     avatar?: string | null
     role?: $Enums.UserRole
-    refreshToken: string
-    isEmailVerified: string
-    emailVerificationToken: string
-    emailVerificationExpiry: Date | string
-    forgotPasswordToken: string
-    forgotPasswordExpiry: Date | string
+    refreshToken?: string | null
+    isEmailVerified?: boolean
+    emailVerificationToken?: string | null
+    emailVerificationExpiry?: Date | string | null
+    forgotPasswordToken?: string | null
+    forgotPasswordExpiry?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -4668,12 +4759,12 @@ export namespace Prisma {
     password: string
     avatar?: string | null
     role?: $Enums.UserRole
-    refreshToken: string
-    isEmailVerified: string
-    emailVerificationToken: string
-    emailVerificationExpiry: Date | string
-    forgotPasswordToken: string
-    forgotPasswordExpiry: Date | string
+    refreshToken?: string | null
+    isEmailVerified?: boolean
+    emailVerificationToken?: string | null
+    emailVerificationExpiry?: Date | string | null
+    forgotPasswordToken?: string | null
+    forgotPasswordExpiry?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -4701,12 +4792,12 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-    refreshToken?: StringFieldUpdateOperationsInput | string
-    isEmailVerified?: StringFieldUpdateOperationsInput | string
-    emailVerificationToken?: StringFieldUpdateOperationsInput | string
-    emailVerificationExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
-    forgotPasswordToken?: StringFieldUpdateOperationsInput | string
-    forgotPasswordExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
+    emailVerificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerificationExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    forgotPasswordToken?: NullableStringFieldUpdateOperationsInput | string | null
+    forgotPasswordExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -4718,12 +4809,12 @@ export namespace Prisma {
     password?: StringFieldUpdateOperationsInput | string
     avatar?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-    refreshToken?: StringFieldUpdateOperationsInput | string
-    isEmailVerified?: StringFieldUpdateOperationsInput | string
-    emailVerificationToken?: StringFieldUpdateOperationsInput | string
-    emailVerificationExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
-    forgotPasswordToken?: StringFieldUpdateOperationsInput | string
-    forgotPasswordExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
+    refreshToken?: NullableStringFieldUpdateOperationsInput | string | null
+    isEmailVerified?: BoolFieldUpdateOperationsInput | boolean
+    emailVerificationToken?: NullableStringFieldUpdateOperationsInput | string | null
+    emailVerificationExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    forgotPasswordToken?: NullableStringFieldUpdateOperationsInput | string | null
+    forgotPasswordExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
