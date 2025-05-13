@@ -107,13 +107,11 @@ export const getProblemsById = asyncHandler(async (req, res) => {
 export const updateProblemById = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  const problemId = await db.problem.findUnique({
-    where: {
-      id,
-    },
+  const existingProblem = await db.problem.findUnique({
+    where: { id },
   });
 
-  if (!problemId) {
+  if (!existingProblem) {
     throw new ApiError(404, "Problem not found");
   }
 
@@ -160,9 +158,7 @@ export const updateProblemById = asyncHandler(async (req, res) => {
   }
 
   const newProblem = await db.problem.update({
-    where: {
-      id: problemId.id,
-    },
+    where: { id },
     data: {
       title,
       description,
@@ -181,6 +177,21 @@ export const updateProblemById = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, newProblem, "Problem created successfully"));
 });
 
-export const deleteProblem = asyncHandler(async (req, res) => {});
+export const deleteProblem = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const problem = await db.problem.findUnique({
+    where: { id },
+  });
+
+  if (!problem) {
+    throw new ApiError(404, "Problem not found");
+  }
+
+  await db.problem.delete({
+    where: { id },
+  });
+  res.status(200).json(new ApiResponse(200, null, "Problem deleted Successfully"));
+});
 
 export const getAllProblemsSolvedByUser = asyncHandler(async (req, res) => {});
