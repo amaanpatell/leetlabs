@@ -90,9 +90,7 @@ export const getProblemsById = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
   const problems = await db.problem.findUnique({
-    where: {
-      id,
-    },
+    where: { id },
   });
 
   if (!problems) {
@@ -101,7 +99,7 @@ export const getProblemsById = asyncHandler(async (req, res) => {
 
   res
     .status(200)
-    .json(new ApiResponse(200, problem, "Problem fetched successfully"));
+    .json(new ApiResponse(200, problems, "Problem fetched successfully"));
 });
 
 export const updateProblemById = asyncHandler(async (req, res) => {
@@ -191,7 +189,9 @@ export const deleteProblem = asyncHandler(async (req, res) => {
   await db.problem.delete({
     where: { id },
   });
-  res.status(200).json(new ApiResponse(200, null, "Problem deleted Successfully"));
+  res
+    .status(200)
+    .json(new ApiResponse(200, null, "Problem deleted Successfully"));
 });
 
 export const getAllProblemsSolvedByUser = asyncHandler(async (req, res) => {});
