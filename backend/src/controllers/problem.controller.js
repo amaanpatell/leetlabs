@@ -37,6 +37,8 @@ export const createProblem = asyncHandler(async (req, res) => {
       stdin: input,
       expected_output: output,
     }));
+    console.log(submissions, "Hey-----------");
+    
 
     const submissionResults = await submitBatch(submissions);
     const tokens = submissionResults.map((res) => res.token);
