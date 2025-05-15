@@ -196,4 +196,6 @@ export const deleteProblem = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, null, "Problem deleted Successfully"));
 });
 
-export const getAllProblemsSolvedByUser = asyncHandler(async (req, res) => {});
+export const getAllProblemsSolvedByUser = asyncHandler(async (req, res) => {
+  
+});
