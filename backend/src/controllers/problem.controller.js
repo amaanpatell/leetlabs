@@ -38,7 +38,6 @@ export const createProblem = asyncHandler(async (req, res) => {
       expected_output: output,
     }));
     console.log(submissions, "Hey-----------");
-    
 
     const submissionResults = await submitBatch(submissions);
     const tokens = submissionResults.map((res) => res.token);
@@ -197,5 +196,24 @@ export const deleteProblem = asyncHandler(async (req, res) => {
 });
 
 export const getAllProblemsSolvedByUser = asyncHandler(async (req, res) => {
-  
+  const problems = await db.problem.findMany({
+    where: {
+      ProblemSolved: {
+        some: {
+          userId: req.user.id,
+        },
+      },
+    },
+    include: {
+      ProblemSolved: {
+        where: {
+          userId: req.user.id,
+        },
+      },
+    },
+  });
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, problems, "Problems Fetched successfully"));
 });
