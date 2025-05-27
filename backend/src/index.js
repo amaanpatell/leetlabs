@@ -2,12 +2,13 @@ import express, { urlencoded } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+
 import authRoutes from "./routes/auth.routes.js";
 import problemRoutes from "./routes/problem.routes.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
 import executionRoute from "./routes/executeCode.routes.js";
 import submissionRoutes from "./routes/submission.routes.js";
-import playlistRoutes from './routes/playlist.routes.js'
+import playlistRoutes from "./routes/playlist.routes.js";
 
 dotenv.config({
   path: "./.env",
@@ -16,6 +17,12 @@ dotenv.config({
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(cookieParser());
 app.use(urlencoded({ extended: true }));
