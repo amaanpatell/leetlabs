@@ -72,7 +72,7 @@ export const addProblemToPlaylist = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Missing problemId");
   }
 
-  const problemInPlaylist = await db.problemInPlaylist.create({
+  const problemInPlaylist = await db.ProblemInPlaylist.createMany({
     data: {
       playListId: playlistId,
       problemId,

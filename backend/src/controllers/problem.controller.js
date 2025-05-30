@@ -77,7 +77,15 @@ export const createProblem = asyncHandler(async (req, res) => {
 });
 
 export const getAllProblems = asyncHandler(async (req, res) => {
-  const problems = await db.problem.findMany();
+  const problems = await db.problem.findMany({
+    include: {
+      ProblemSolved: {
+        where: {
+          userId: req.user.id,
+        },
+      },
+    },
+  });
   if (!problems) {
     throw new ApiError(404, "No problems found");
   }
