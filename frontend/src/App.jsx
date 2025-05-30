@@ -11,6 +11,7 @@ import Layout from "./layout/Layout";
 import AdminRoute from "./components/AdminRoute";
 import AddProblem from "./page/AddProblem";
 import ProblemPage from "./page/ProblemPage";
+import Profile from "./page/Profile";
 
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -28,37 +29,40 @@ const App = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-start ">
+    <div className="flex flex-col items-center justify-start  ">
+      {/* <Navbar/> */}
       <Toaster />
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route
             index
-            element={authUser ? <HomePage /> : <Navigate to={"/login"} />}
+            element={authUser ? <HomePage /> : <Navigate to="/login" />}
           />
         </Route>
-
-        <Route
-          path="/login"
-          element={!authUser ? <LoginPage /> : <Navigate to={"/"} />}
-        />
-
         <Route
           path="/signup"
-          element={!authUser ? <SignUpPage /> : <Navigate to={"/"} />}
+          element={!authUser ? <SignUpPage /> : <Navigate to="/" />}
+        />
+        <Route
+          path="/login"
+          element={!authUser ? <LoginPage /> : <Navigate to="/" />}
         />
 
         <Route
           path="/problem/:id"
-          element={authUser ? <ProblemPage /> : <Navigate to={"/login"} />}
+          element={authUser ? <ProblemPage /> : <Navigate to="/login" />}
         />
-
         <Route element={<AdminRoute />}>
           <Route
             path="/add-problem"
-            element={authUser ? <AddProblem /> : <Navigate to="/" />}
+            element={authUser ? <AddProblem /> : <Navigate to="/login" />}
           />
         </Route>
+
+        <Route
+          path="/profile"
+          element={authUser ? <Profile /> : <Navigate to="/login" />}
+        />
       </Routes>
     </div>
   );

@@ -40,7 +40,7 @@ export const useProblemStore = create((set) => ({
 
   getSolvedProblemsByUser: async () => {
     try {
-      const response = await axiosInstance.get("/problems/get-solved-problem");
+      const response = await axiosInstance.get("/problems/get-solved-problems");
       set({ solvedProblems: response.data.data });
     } catch (error) {
       console.error("Error fetching solved problems:", error);
