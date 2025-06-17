@@ -10,8 +10,9 @@ import {
 const SubmissionsList = ({ submissions, isLoading }) => {
   // Helper function to safely parse JSON strings
   const safeParse = (data) => {
+    if (!data) return [];
     try {
-      return JSON.parse(data);
+      return JSON.parse(data) || [];
     } catch (error) {
       console.error("Error parsing data:", error);
       return [];
