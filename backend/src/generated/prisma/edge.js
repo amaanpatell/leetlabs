@@ -241,7 +241,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/home/amaan-patel/code/leet-lab/backend/src/generated/prisma",
+      "value": "/home/amaan-patel/code/leetlabs/backend/src/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -255,7 +255,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/home/amaan-patel/code/leet-lab/backend/prisma/schema.prisma",
+    "sourceFilePath": "/home/amaan-patel/code/leetlabs/backend/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -273,7 +273,7 @@ const config = {
     "db": {
       "url": {
         "fromEnvVar": "DATABASE_URL",
-        "value": "postgresql://myuser:hugecar@localhost:5432/postgres"
+        "value": "postgresql://myuser:mypassword@localhost:5432/postgres"
       }
     }
   },
