@@ -11,6 +11,12 @@ import {
   BookOpen,
   CheckCircle2,
   Download,
+  ChevronRight,
+  ChevronLeft,
+  Info,
+  Tags,
+  TestTube,
+  Settings,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,10 +31,10 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { axiosInstance } from "@/utils/axios";
-import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { Editor } from "@monaco-editor/react";
+import toast from "react-hot-toast";
+import { axiosInstance } from "@/utils/axios";
 
 const problemSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
@@ -522,7 +528,41 @@ public class Main {
   },
 };
 
+const STEPS = [
+  {
+    id: 1,
+    title: "Basic Information",
+    description: "Problem details and difficulty",
+    icon: Info,
+  },
+  {
+    id: 2,
+    title: "Tags & Categories",
+    description: "Problem classification",
+    icon: Tags,
+  },
+  {
+    id: 3,
+    title: "Test Cases",
+    description: "Input/output examples",
+    icon: TestTube,
+  },
+  {
+    id: 4,
+    title: "Code Templates",
+    description: "Starter code and solutions",
+    icon: Code2,
+  },
+  {
+    id: 5,
+    title: "Additional Info",
+    description: "Constraints, hints, editorial",
+    icon: Settings,
+  },
+];
+
 const CreateProblemForm = () => {
+  const [currentStep, setCurrentStep] = useState(1);
   const [sampleType, setSampleType] = useState("DP");
   const [isLoading, setIsLoading] = useState(false);
   const navigation = useNavigate();
@@ -534,6 +574,7 @@ const CreateProblemForm = () => {
     reset,
     watch,
     setValue,
+    trigger,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(problemSchema),
@@ -579,21 +620,63 @@ const CreateProblemForm = () => {
     name: "tags",
   });
 
+  const validateCurrentStep = async () => {
+    let fieldsToValidate = [];
+
+    switch (currentStep) {
+      case 1:
+        fieldsToValidate = ["title", "description", "difficulty"];
+        break;
+      case 2:
+        fieldsToValidate = ["tags"];
+        break;
+      case 3:
+        fieldsToValidate = ["testCases"];
+        break;
+      case 4:
+        fieldsToValidate = ["codeSnippets", "referenceSolutions", "examples"];
+        break;
+      case 5:
+        fieldsToValidate = ["constraints"];
+        break;
+      default:
+        return true;
+    }
+
+    return await trigger(fieldsToValidate);
+  };
+
+  const nextStep = async () => {
+    const isValid = await validateCurrentStep();
+    if (isValid && currentStep < STEPS.length) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
 
   const onSubmit = async (values) => {
-    try {
-      setIsLoading(true);
-      console.log("Form submitted:", values);
-      // Replace with your API call
-      const res = await axiosInstance.post("/problems/create-problem", values);
-      toast.success(res.data.message || "Problem Created successfully⚡");
-      navigation("/"); // Redirect to problems page after successful creation
-      
-    } catch (error) {
-      console.error("Error creating problem:", error);
-      toast.error(error.response?.data?.message || "Error creating problem");
-    } finally {
-      setIsLoading(false);
+    // Prevent accidental submission - only submit when explicitly clicked
+    if (!isLoading) {
+      try {
+        setIsLoading(true);
+        console.log("Form submitted:", values);
+        const res = await axiosInstance.post(
+          "/problems/create-problem",
+          values
+        );
+        toast.success(res.data.message || "Problem Created successfully⚡");
+        navigation("/problem"); // Redirect to problems page after successful creation
+      } catch (error) {
+        console.error("Error creating problem:", error);
+        toast.error(error.response?.data?.message || "Error creating problem");
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -604,8 +687,7 @@ const CreateProblemForm = () => {
     reset(sampleData);
   };
 
-
-const CodeEditor = ({ value, onChange, language }) => (
+  const CodeEditor = ({ value, onChange, language }) => (
   <Editor
     height="300px"
     language={language.toLowerCase()}
@@ -624,434 +706,508 @@ const CodeEditor = ({ value, onChange, language }) => (
   />
 );
 
-  return (
-    <div className="container mx-auto py-8 px-4">
-      <Card className="shadow-xl">
-        <CardHeader className="pb-6">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <CardTitle className="text-3xl flex items-center gap-3">
-              Create Problem
-            </CardTitle>
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="title" className="text-base font-semibold">
+                Problem Title
+              </Label>
+              <Input
+                id="title"
+                {...register("title")}
+                placeholder="Enter a descriptive problem title"
+                className="text-base"
+              />
+              {errors.title && (
+                <p className="text-sm text-destructive">
+                  {errors.title.message}
+                </p>
+              )}
+            </div>
 
-            <div className="flex flex-col md:flex-row gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-base font-semibold">
+                Problem Description
+              </Label>
+              <Textarea
+                id="description"
+                {...register("description")}
+                placeholder="Describe the problem in detail..."
+                className="min-h-32 text-base resize-y"
+              />
+              {errors.description && (
+                <p className="text-sm text-destructive">
+                  {errors.description.message}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="difficulty" className="text-base font-semibold">
+                Difficulty Level
+              </Label>
+              <Select onValueChange={(value) => setValue("difficulty", value)}>
+                <SelectTrigger className="text-base">
+                  <SelectValue placeholder="Select difficulty level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="EASY">Easy</SelectItem>
+                  <SelectItem value="MEDIUM">Medium</SelectItem>
+                  <SelectItem value="HARD">Hard</SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.difficulty && (
+                <p className="text-sm text-destructive">
+                  {errors.difficulty.message}
+                </p>
+              )}
+            </div>
+          </div>
+        );
+
+      case 2:
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold">Problem Tags</h3>
+                <p className="text-sm text-muted-foreground">
+                  Add relevant tags to categorize your problem
+                </p>
+              </div>
+              <Button type="button" size="sm" onClick={() => appendTag("")}>
+                <Plus className="w-4 h-4 mr-1" /> Add Tag
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {tagFields.map((field, index) => (
+                <div key={field.id} className="flex gap-2 items-center">
+                  <Input
+                    {...register(`tags.${index}`)}
+                    placeholder="Enter tag (e.g., Array, Dynamic Programming)"
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeTag(index)}
+                    disabled={tagFields.length === 1}
+                  >
+                    <Trash2 className="w-4 h-4 text-destructive" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+            {errors.tags && (
+              <p className="text-sm text-destructive">{errors.tags.message}</p>
+            )}
+          </div>
+        );
+
+      case 3:
+        return (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold">Test Cases</h3>
+                <p className="text-sm text-muted-foreground">
+                  Define input/output pairs to validate solutions
+                </p>
+              </div>
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => appendTestCase({ input: "", output: "" })}
+              >
+                <Plus className="w-4 h-4 mr-1" /> Add Test Case
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              {testCaseFields.map((field, index) => (
+                <Card key={field.id} className="border-dashed">
+                  <CardHeader className="pb-3">
+                    <div className="flex justify-between items-center">
+                      <h4 className="text-md font-semibold">
+                        Test Case #{index + 1}
+                      </h4>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeTestCase(index)}
+                        disabled={testCaseFields.length === 1}
+                      >
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label className="font-medium">Input</Label>
+                        <Textarea
+                          {...register(`testCases.${index}.input`)}
+                          placeholder="Enter test input"
+                          className="min-h-20 resize-y"
+                        />
+                        {errors.testCases?.[index]?.input && (
+                          <p className="text-sm text-destructive">
+                            {errors.testCases[index].input.message}
+                          </p>
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="font-medium">Expected Output</Label>
+                        <Textarea
+                          {...register(`testCases.${index}.output`)}
+                          placeholder="Enter expected output"
+                          className="min-h-20 resize-y"
+                        />
+                        {errors.testCases?.[index]?.output && (
+                          <p className="text-sm text-destructive">
+                            {errors.testCases[index].output.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 4:
+        return (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold">
+                Code Templates & Solutions
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Provide starter code and reference solutions
+              </p>
+            </div>
+
+            <Tabs defaultValue="JAVASCRIPT" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="JAVASCRIPT">JavaScript</TabsTrigger>
+                <TabsTrigger value="PYTHON">Python</TabsTrigger>
+                <TabsTrigger value="JAVA">Java</TabsTrigger>
+              </TabsList>
+
+              {["JAVASCRIPT", "PYTHON", "JAVA"].map((language) => (
+                <TabsContent
+                  key={language}
+                  value={language}
+                  className="space-y-6"
+                >
+                  {/* Starter Code */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Code2 className="w-5 h-5" />
+                        Starter Code Template
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      <Controller
+                        name={`codeSnippets.${language}`}
+                        control={control}
+                        render={({ field }) => (
+                          <CodeEditor
+                            value={field.value}
+                            onChange={field.onChange}
+                            language={language}
+                          />
+                        )}
+                      />
+                    </CardContent>
+                  </Card>
+
+                  {/* Reference Solution */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <CheckCircle2 className="w-5 h-5" />
+                        Reference Solution
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      <Controller
+                        name={`referenceSolutions.${language}`}
+                        control={control}
+                        render={({ field }) => (
+                          <CodeEditor
+                            value={field.value}
+                            onChange={field.onChange}
+                            language={language}
+                          />
+                        )}
+                      />
+                    </CardContent>
+                  </Card>
+
+                  {/* Example */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Example</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="font-medium">Input</Label>
+                          <Textarea
+                            {...register(`examples.${language}.input`)}
+                            placeholder="Example input"
+                            className="min-h-16 resize-y"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="font-medium">Output</Label>
+                          <Textarea
+                            {...register(`examples.${language}.output`)}
+                            placeholder="Example output"
+                            className="min-h-16 resize-y"
+                          />
+                        </div>
+                        <div className="md:col-span-2 space-y-2">
+                          <Label className="font-medium">
+                            Explanation (Optional)
+                          </Label>
+                          <Textarea
+                            {...register(`examples.${language}.explanation`)}
+                            placeholder="Explain the example"
+                            className="min-h-20 resize-y"
+                          />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              ))}
+            </Tabs>
+          </div>
+        );
+
+      case 5:
+        return (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-lg font-semibold">Additional Information</h3>
+              <p className="text-sm text-muted-foreground">
+                Constraints, hints, and editorial content
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Label className="font-medium">Constraints *</Label>
+                <Textarea
+                  {...register("constraints")}
+                  placeholder="e.g., 1 <= n <= 1000, -10^9 <= nums[i] <= 10^9"
+                  className="min-h-20 resize-y"
+                />
+                {errors.constraints && (
+                  <p className="text-sm text-destructive">
+                    {errors.constraints.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label className="font-medium">Hints (Optional)</Label>
+                <Textarea
+                  {...register("hints")}
+                  placeholder="Provide hints to help users solve the problem"
+                  className="min-h-24 resize-y"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="font-medium">Editorial (Optional)</Label>
+                <Textarea
+                  {...register("editorial")}
+                  placeholder="Explain the approach and solution strategy"
+                  className="min-h-32 resize-y"
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto py-8 px-4 max-w-7xl">
+        {/* Step Breadcrumb */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-3xl font-bold">Create Problem</h1>
+            <div className="flex gap-2">
               <div className="flex rounded-lg border p-1">
                 <Button
                   type="button"
                   variant={sampleType === "DP" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setSampleType("DP")}
-                  className="rounded-md"
                 >
-                  DP Problem
+                  DP Sample
                 </Button>
                 <Button
                   type="button"
                   variant={sampleType === "string" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => setSampleType("string")}
-                  className="rounded-md"
                 >
-                  String Problem
+                  String Sample
                 </Button>
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={loadSampleData}
-                className="gap-2"
-              >
-                <Download className="w-4 h-4" />
+              <Button type="button" variant="outline" onClick={loadSampleData}>
+                <Download className="w-4 h-4 mr-1" />
                 Load Sample
               </Button>
             </div>
           </div>
-        </CardHeader>
 
-        <CardContent className="space-y-8">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-            {/* Basic Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl">Basic Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="title" className="text-base font-semibold">
-                    Title
-                  </Label>
-                  <Input
-                    id="title"
-                    {...register("title")}
-                    placeholder="Enter problem title"
-                    className="text-base"
-                  />
-                  {errors.title && (
-                    <p className="text-sm text-red-600">
-                      {errors.title.message}
-                    </p>
-                  )}
-                </div>
+          {/* Progress Steps */}
+          <div className="flex items-center justify-between">
+            {STEPS.map((step, index) => {
+              const Icon = step.icon;
+              const isActive = currentStep === step.id;
+              const isCompleted = currentStep > step.id;
+              const isClickable = currentStep >= step.id;
 
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="description"
-                    className="text-base font-semibold"
+              return (
+                <React.Fragment key={step.id}>
+                  <div
+                    className={`flex flex-col items-center cursor-pointer transition-all ${
+                      isClickable
+                        ? "hover:scale-105"
+                        : "cursor-not-allowed opacity-50"
+                    }`}
+                    onClick={() => isClickable && setCurrentStep(step.id)}
                   >
-                    Description
-                  </Label>
-                  <Textarea
-                    id="description"
-                    {...register("description")}
-                    placeholder="Enter problem description"
-                    className="min-h-32 text-base resize-y"
-                  />
-                  {errors.description && (
-                    <p className="text-sm text-red-600">
-                      {errors.description.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="difficulty"
-                    className="text-base font-semibold"
-                  >
-                    Difficulty
-                  </Label>
-                  <Select
-                    onValueChange={(value) => setValue("difficulty", value)}
-                  >
-                    <SelectTrigger className="text-base">
-                      <SelectValue placeholder="Select difficulty" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="EASY">Easy</SelectItem>
-                      <SelectItem value="MEDIUM">Medium</SelectItem>
-                      <SelectItem value="HARD">Hard</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {errors.difficulty && (
-                    <p className="text-sm text-red-600">
-                      {errors.difficulty.message}
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Tags */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <BookOpen className="w-5 h-5" />
-                    Tags
-                  </CardTitle>
-                  <Button type="button" size="sm" onClick={() => appendTag("")}>
-                    <Plus className="w-4 h-4 mr-1" /> Add Tag
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {tagFields.map((field, index) => (
-                    <div key={field.id} className="flex gap-2 items-center">
-                      <Input
-                        {...register(`tags.${index}`)}
-                        placeholder="Enter tag"
-                        className="flex-1"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeTag(index)}
-                        disabled={tagFields.length === 1}
-                      >
-                        <Trash2 className="w-4 h-4 text-red-600" />
-                      </Button>
+                    <div
+                      className={`w-12 h-12 rounded-full flex items-center justify-center border-2 mb-2 transition-all ${
+                        isActive
+                          ? "bg-primary border-primary text-primary-foreground"
+                          : isCompleted
+                          ? "bg-primary border-primary text-primary-foreground"
+                          : "bg-background border-muted-foreground text-muted-foreground"
+                      }`}
+                    >
+                      {isCompleted ? (
+                        <CheckCircle2 className="w-6 h-6" />
+                      ) : (
+                        <Icon className="w-6 h-6" />
+                      )}
                     </div>
-                  ))}
-                </div>
-                {errors.tags && (
-                  <p className="text-sm text-red-600 mt-2">
-                    {errors.tags.message}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
+                    <div className="text-center">
+                      <div
+                        className={`text-sm font-medium ${
+                          isActive
+                            ? "text-primary"
+                            : isCompleted
+                            ? "text-primary"
+                            : "text-muted-foreground"
+                        }`}
+                      >
+                        {step.title}
+                      </div>
+                      <div className="text-xs text-muted-foreground hidden sm:block">
+                        {step.description}
+                      </div>
+                    </div>
+                  </div>
+                  {index < STEPS.length - 1 && (
+                    <ChevronRight className="w-5 h-5 text-muted-foreground hidden md:block" />
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </div>
+        </div>
 
-            {/* Test Cases */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <CheckCircle2 className="w-5 h-5" />
-                    Test Cases
-                  </CardTitle>
+        {/* Step Content */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              {React.createElement(STEPS[currentStep - 1].icon, {
+                className: "w-6 h-6",
+              })}
+              {STEPS[currentStep - 1].title}
+            </CardTitle>
+            <p className="text-muted-foreground">
+              Step {currentStep} of {STEPS.length}:{" "}
+              {STEPS[currentStep - 1].description}
+            </p>
+          </CardHeader>
+          <CardContent className="p-8">
+            <form onSubmit={(e) => e.preventDefault()}>
+              {renderStepContent()}
+
+              {/* Navigation Buttons */}
+              <div className="flex justify-between items-center pt-8 mt-8 border-t">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={prevStep}
+                  disabled={currentStep === 1}
+                  className="flex items-center gap-2"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  Previous
+                </Button>
+
+                <div className="text-sm text-muted-foreground">
+                  Step {currentStep} of {STEPS.length}
+                </div>
+
+                {currentStep === STEPS.length ? (
                   <Button
                     type="button"
-                    size="sm"
-                    onClick={() => appendTestCase({ input: "", output: "" })}
+                    onClick={handleSubmit(onSubmit)}
+                    disabled={isLoading}
+                    className="flex items-center gap-2"
                   >
-                    <Plus className="w-4 h-4 mr-1" /> Add Test Case
+                    {isLoading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-4 h-4" />
+                        Create Problem
+                      </>
+                    )}
                   </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {testCaseFields.map((field, index) => (
-                  <Card key={field.id}>
-                    <CardHeader>
-                      <div className="flex justify-between items-center">
-                        <h4 className="text-lg font-semibold">
-                          Test Case #{index + 1}
-                        </h4>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeTestCase(index)}
-                          disabled={testCaseFields.length === 1}
-                          className="text-red-600"
-                        >
-                          <Trash2 className="w-4 h-4 mr-1" /> Remove
-                        </Button>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <Label className="font-medium">Input</Label>
-                          <Textarea
-                            {...register(`testCases.${index}.input`)}
-                            placeholder="Enter test case input"
-                            className="min-h-24 resize-y"
-                          />
-                          {errors.testCases?.[index]?.input && (
-                            <p className="text-sm text-red-600">
-                              {errors.testCases[index].input.message}
-                            </p>
-                          )}
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="font-medium">Expected Output</Label>
-                          <Textarea
-                            {...register(`testCases.${index}.output`)}
-                            placeholder="Enter expected output"
-                            className="min-h-24 resize-y"
-                          />
-                          {errors.testCases?.[index]?.output && (
-                            <p className="text-sm text-red-600">
-                              {errors.testCases[index].output.message}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                {errors.testCases && !Array.isArray(errors.testCases) && (
-                  <p className="text-sm text-red-600">
-                    {errors.testCases.message}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Code Editor Sections */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Code2 className="w-5 h-5" />
-                  Code Templates & Solutions
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Tabs defaultValue="JAVASCRIPT" className="w-full">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="JAVASCRIPT">JavaScript</TabsTrigger>
-                    <TabsTrigger value="PYTHON">Python</TabsTrigger>
-                    <TabsTrigger value="JAVA">Java</TabsTrigger>
-                  </TabsList>
-
-                  {["JAVASCRIPT", "PYTHON", "JAVA"].map((language) => (
-                    <TabsContent
-                      key={language}
-                      value={language}
-                      className="space-y-6"
-                    >
-                      {/* Starter Code */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-lg">
-                            Starter Code Template
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <Controller
-                            name={`codeSnippets.${language}`}
-                            control={control}
-                            render={({ field }) => (
-                              <CodeEditor
-                                value={field.value}
-                                onChange={field.onChange}
-                                language={language}
-                              />
-                            )}
-                          />
-                          {errors.codeSnippets?.[language] && (
-                            <p className="text-sm text-red-600 mt-2">
-                              {errors.codeSnippets[language].message}
-                            </p>
-                          )}
-                        </CardContent>
-                      </Card>
-
-                      {/* Reference Solution */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-lg flex items-center gap-2">
-                            <CheckCircle2 className="w-5 h-5 text-green-600" />
-                            Reference Solution
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <Controller
-                            name={`referenceSolutions.${language}`}
-                            control={control}
-                            render={({ field }) => (
-                              <CodeEditor
-                                value={field.value}
-                                onChange={field.onChange}
-                                language={language}
-                              />
-                            )}
-                          />
-                          {errors.referenceSolutions?.[language] && (
-                            <p className="text-sm text-red-600 mt-2">
-                              {errors.referenceSolutions[language].message}
-                            </p>
-                          )}
-                        </CardContent>
-                      </Card>
-
-                      {/* Examples */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-lg">Example</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                              <Label className="font-medium">Input</Label>
-                              <Textarea
-                                {...register(`examples.${language}.input`)}
-                                placeholder="Example input"
-                                className="min-h-20 resize-y"
-                              />
-                              {errors.examples?.[language]?.input && (
-                                <p className="text-sm text-red-600">
-                                  {errors.examples[language].input.message}
-                                </p>
-                              )}
-                            </div>
-                            <div className="space-y-2">
-                              <Label className="font-medium">Output</Label>
-                              <Textarea
-                                {...register(`examples.${language}.output`)}
-                                placeholder="Example output"
-                                className="min-h-20 resize-y"
-                              />
-                              {errors.examples?.[language]?.output && (
-                                <p className="text-sm text-red-600">
-                                  {errors.examples[language].output.message}
-                                </p>
-                              )}
-                            </div>
-                            <div className="md:col-span-2 space-y-2">
-                              <Label className="font-medium">Explanation</Label>
-                              <Textarea
-                                {...register(
-                                  `examples.${language}.explanation`
-                                )}
-                                placeholder="Explain the example"
-                                className="min-h-24 resize-y"
-                              />
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </TabsContent>
-                  ))}
-                </Tabs>
-              </CardContent>
-            </Card>
-
-            {/* Additional Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Lightbulb className="w-5 h-5 text-yellow-600" />
-                  Additional Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label className="font-medium">Constraints</Label>
-                  <Textarea
-                    {...register("constraints")}
-                    placeholder="Enter problem constraints"
-                    className="min-h-24 resize-y"
-                  />
-                  {errors.constraints && (
-                    <p className="text-sm text-red-600">
-                      {errors.constraints.message}
-                    </p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label className="font-medium">Hints (Optional)</Label>
-                  <Textarea
-                    {...register("hints")}
-                    placeholder="Enter hints for solving the problem"
-                    className="min-h-24 resize-y"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="font-medium">Editorial (Optional)</Label>
-                  <Textarea
-                    {...register("editorial")}
-                    placeholder="Enter problem editorial/solution explanation"
-                    className="min-h-32 resize-y"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <div className="flex justify-end pt-4 border-t">
-              <Button
-                type="submit"
-                size="lg"
-                className="gap-2"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Creating...
-                  </>
                 ) : (
-                  <>
-                    <CheckCircle2 className="w-5 h-5" />
-                    Create Problem
-                  </>
+                  <Button
+                    type="button"
+                    onClick={nextStep}
+                    className="flex items-center gap-2"
+                  >
+                    Next
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
                 )}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

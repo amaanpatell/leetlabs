@@ -52,9 +52,9 @@ export function LoginForm({ className, ...props }) {
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                 <Code className="size-6" />
               </div>
-              <span className="sr-only">Acme Inc.</span>
+              <span className="sr-only">Coding Buddy Inc.</span>
             </a>
-            <h1 className="text-xl font-bold">Welcome Back to Acme Inc.</h1>
+            <h1 className="text-xl font-bold">Welcome Back to Codding Buddy.</h1>
             <div className="text-center text-sm">
               Don&apos;t have an account?{" "}
               <Link to="/signup" className="underline underline-offset-4">

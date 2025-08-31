@@ -5,18 +5,18 @@ import { Toaster } from "react-hot-toast";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
-import { useAuthStore } from "./store/useAuthStore";
-import { Loader } from "lucide-react";
-import Navbar from "./components/Navbar";
 import Dashboard from "./pages/Dashboard";
 import Explore from "./pages/Explore";
 import Interview from "./pages/Interview";
 import Analytics from "./pages/Analytics";
-import AdminRoute from "./components/AdminRoute";
 import AddProblem from "./pages/AddProblem";
 import ProblemPage from "./pages/ProblemPage";
+
+import { useAuthStore } from "./store/useAuthStore";
+import { Loader } from "lucide-react";
+import Navbar from "./layout/Navbar";
+import AdminRoute from "./components/AdminRoute";
 import { ThemeProvider } from "./components/Theme-provider";
-// import Profile from "./pages/Profile";
 
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -25,7 +25,7 @@ const App = () => {
     checkAuth();
   }, [checkAuth]);
 
-  if (isCheckingAuth && !authUser) {
+  if (isCheckingAuth) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Loader className="size-10 animate-spin" />
@@ -35,16 +35,15 @@ const App = () => {
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      {/* <Navbar/> */}
       <Toaster
         position="bottom-right"
         toastOptions={{
           duration: 4000,
           className: `
-      bg-slate-950 text-slate-100  border border-slate-200 
-      dark:bg-white dark:text-slate-950 dark:border-slate-800
-      rounded-lg px-4 py-3
-    `,
+            bg-slate-950 text-slate-100 border border-slate-200
+            dark:bg-white dark:text-slate-950 dark:border-slate-800
+            rounded-lg px-4 py-3
+          `,
           success: {
             iconTheme: {
               primary: "#22c55e",
@@ -67,54 +66,54 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Navbar />}>
           <Route
-            path="/"
-            element={authUser ? <HomePage /> : <Navigate to="/login" />}
-          />
-
-          <Route
-            path="/dashboard"
+            index
             element={authUser ? <Dashboard /> : <Navigate to="/login" />}
           />
 
           <Route
-            path="/explore"
+            path="problem"
+            element={authUser ? <HomePage /> : <Navigate to="/login" />}
+          />
+
+          <Route
+            path="explore"
             element={authUser ? <Explore /> : <Navigate to="/login" />}
           />
 
           <Route
-            path="/interview"
+            path="interview"
             element={authUser ? <Interview /> : <Navigate to="/login" />}
           />
 
           <Route
-            path="/analytics"
+            path="analytics"
             element={authUser ? <Analytics /> : <Navigate to="/login" />}
           />
+
           <Route
-            path="/problem/:id"
+            path="problem/:id"
             element={authUser ? <ProblemPage /> : <Navigate to="/login" />}
           />
+
           <Route element={<AdminRoute />}>
             <Route
-              path="/add-problem"
+              path="add-problem"
               element={authUser ? <AddProblem /> : <Navigate to="/login" />}
             />
           </Route>
         </Route>
 
         <Route
-          path="/signup"
+          path="signup"
           element={!authUser ? <SignUpPage /> : <Navigate to="/" />}
         />
+        
         <Route
-          path="/login"
+          path="login"
           element={!authUser ? <LoginPage /> : <Navigate to="/" />}
         />
 
-        {/* <Route
-          path="/profile"
-          element={authUser ? <Profile /> : <Navigate to="/login" />}
-        /> */}
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </ThemeProvider>
   );

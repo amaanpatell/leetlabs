@@ -452,7 +452,7 @@ export default function ProblemPage() {
       <div className="flex justify-between items-center px-4 py-2  border-b border-border">
         {/* Left side - Back button */}
         <div className="flex items-center">
-          <Link to="/">
+          <Link to="/problem">
             <Button
               variant="ghost"
               size="sm"

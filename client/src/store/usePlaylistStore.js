@@ -3,7 +3,7 @@ import { axiosInstance } from "../utils/axios";
 import toast from "react-hot-toast";
 
 export const usePlaylistStore = create((set, get) => ({
-  playlists: [],
+  playlist: [],
   currentPlaylist: null,
   isLoading: false,
   error: null,
@@ -17,7 +17,8 @@ export const usePlaylistStore = create((set, get) => ({
       );
 
       set((state) => ({
-        playlists: [...state.playlists, response.data.playList],
+        playlist: [...state.playlist, response.data.data.playList],
+        isLoading: false
       }));
 
       toast.success("Playlist created successfully");
@@ -25,9 +26,8 @@ export const usePlaylistStore = create((set, get) => ({
     } catch (error) {
       console.error("Error creating playlist:", error);
       toast.error(error.response?.data?.error || "Failed to create playlist");
-      throw error;
-    } finally {
       set({ isLoading: false });
+      throw error;
     }
   },
 
@@ -35,12 +35,17 @@ export const usePlaylistStore = create((set, get) => ({
     try {
       set({ isLoading: true });
       const response = await axiosInstance.get("/playlist");
-      set({ playlists: response.data.data });
+      set({ 
+        playlist: response.data.data || [], 
+        isLoading: false 
+      });
     } catch (error) {
       console.error("Error fetching playlists:", error);
       toast.error("Failed to fetch playlists");
-    } finally {
-      set({ isLoading: false });
+      set({ 
+        isLoading: false,
+        playlist: []
+      });
     }
   },
 
@@ -48,11 +53,13 @@ export const usePlaylistStore = create((set, get) => ({
     try {
       set({ isLoading: true });
       const response = await axiosInstance.get(`/playlist/${playlistId}`);
-      set({ currentPlaylist: response.data.data });
+      set({ 
+        currentPlaylist: response.data.data,
+        isLoading: false 
+      });
     } catch (error) {
       console.error("Error fetching playlist details:", error);
       toast.error("Failed to fetch playlist details");
-    } finally {
       set({ isLoading: false });
     }
   },
@@ -101,19 +108,22 @@ export const usePlaylistStore = create((set, get) => ({
 
   deletePlaylist: async (playlistId) => {
     try {
-      set({ isLoading: true });
       await axiosInstance.delete(`/playlist/${playlistId}`);
 
+      // Update state immediately after successful API call
       set((state) => ({
-        playlists: state.playlists.filter((p) => p.id !== playlistId),
+        playlist: (state.playlist || []).filter((p) => p.id !== playlistId),
+        currentPlaylist: state.currentPlaylist?.id === playlistId ? null : state.currentPlaylist,
+        error: null
       }));
 
       toast.success("Playlist deleted successfully");
+      
     } catch (error) {
       console.error("Error deleting playlist:", error);
+      set({ error: error.message });
       toast.error("Failed to delete playlist");
-    } finally {
-      set({ isLoading: false });
+      throw error;
     }
   },
 }));

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   BarChartIcon,
+  Code,
   FilePen,
   LayoutDashboardIcon,
   ListIcon,
@@ -22,6 +23,7 @@ import {
 } from "lucide-react";
 import { NavDocuments } from "./nav-documents";
 import { useAuthStore } from "@/store/useAuthStore";
+import { Link } from "react-router-dom";
 
 const data = {
   user: {
@@ -32,18 +34,13 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "/dashboard",
+      url: "/",
       icon: LayoutDashboardIcon,
     },
     {
       title: "Problems",
-      url: "/",
+      url: "/problem",
       icon: ListIcon,
-    },
-    {
-      title: "Explore",
-      url: "/explore",
-      icon: SearchIcon,
     },
     {
       title: "Interview",
@@ -73,15 +70,15 @@ export function AppSidebar({ ...props }) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
+              <Link to="/">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <IconInnerShadowTop className="size-4" />
+                  <Code className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Acme Inc.</span>
-                  <span className="truncate text-xs">Enterprise</span>
+                  <span className="truncate font-semibold">Coding Buddy</span>
+                  <span className="truncate text-xs">Coding Challenge</span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
