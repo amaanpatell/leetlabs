@@ -1,4 +1,6 @@
-import * as React from "react"
+"use client";
+
+import * as React from "react";
 import {
   IconDotsVertical,
   IconSearch,
@@ -6,7 +8,7 @@ import {
   IconChevronRight,
   IconChevronsLeft,
   IconChevronsRight,
-} from "@tabler/icons-react"
+} from "@tabler/icons-react";
 import {
   flexRender,
   getCoreRowModel,
@@ -16,24 +18,37 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-} from "@tanstack/react-table"
-import { z } from "zod"
-import { useNavigate } from "react-router-dom"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
+} from "@tanstack/react-table";
+import { z } from "zod";
+import { useNavigate } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useAuthStore } from "@/store/useAuthStore"
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useAuthStore } from "@/store/useAuthStore";
 import {
   Dialog,
   DialogClose,
@@ -42,10 +57,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { usePlaylistStore } from "@/store/usePlaylistStore"
-import { Loader2 } from "lucide-react"
+} from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { usePlaylistStore } from "@/store/usePlaylistStore";
+import { Loader2 } from "lucide-react";
 
 export const schema = z.object({
   id: z.number(),
@@ -55,7 +70,7 @@ export const schema = z.object({
   tags: z.array(z.string()).optional(),
   company: z.string().optional(),
   acceptance: z.string().optional(),
-})
+});
 
 // Difficulty styles mapping - moved outside component for better performance
 const DIFFICULTY_STYLES = {
@@ -63,80 +78,89 @@ const DIFFICULTY_STYLES = {
   medium:
     "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800",
   hard: "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800",
-  default: "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800",
-}
+  default:
+    "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800",
+};
 
 // Memoized Difficulty Cell Component
 const DifficultyCell = React.memo(({ difficulty }) => {
-  const styleKey = difficulty?.toLowerCase() || "default"
-  const style = DIFFICULTY_STYLES[styleKey] || DIFFICULTY_STYLES.default
+  const styleKey = difficulty?.toLowerCase() || "default";
+  const style = DIFFICULTY_STYLES[styleKey] || DIFFICULTY_STYLES.default;
 
   return (
     <div className="w-20">
-      <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium border ${style}`}>
+      <span
+        className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium border ${style}`}
+      >
         {difficulty}
       </span>
     </div>
-  )
-})
+  );
+});
 
-DifficultyCell.displayName = "DifficultyCell"
+DifficultyCell.displayName = "DifficultyCell";
 
 // Memoized Actions Dropdown
 const ActionsDropdown = React.memo(({ problem }) => {
-  const { authUser } = useAuthStore()
-  const { playlist, isLoading, getAllPlaylists, addProblemToPlaylist } = usePlaylistStore()
+  const { authUser } = useAuthStore();
+  const { playlist, isLoading, getAllPlaylists, addProblemToPlaylist } =
+    usePlaylistStore();
 
-  const [isPlaylistSelectionOpen, setIsPlaylistSelectionOpen] = React.useState(false)
-  const [selectedPlaylist, setSelectedPlaylist] = React.useState("")
-  const [menuOpen, setMenuOpen] = React.useState(false)
+  const [isPlaylistSelectionOpen, setIsPlaylistSelectionOpen] =
+    React.useState(false);
+  const [selectedPlaylist, setSelectedPlaylist] = React.useState("");
+  const [menuOpen, setMenuOpen] = React.useState(false); // added controlled open state
 
-  // Memoize valid playlists with null check
   const validPlaylists = React.useMemo(() => {
-    if (!playlist || !Array.isArray(playlist)) return []
-    return playlist.filter((playlist) => playlist?.id)
-  }, [playlist])
+    if (!playlist || !Array.isArray(playlist)) return [];
+    return playlist.filter((playlist) => playlist?.id);
+  }, [playlist]);
 
   const handleDialogOpen = React.useCallback(() => {
-    setMenuOpen(false)
-    setIsPlaylistSelectionOpen(true)
+    setMenuOpen(false); // ensure dropdown closes before dialog opens
+    setIsPlaylistSelectionOpen(true);
     if (!playlist || playlist.length === 0) {
-      getAllPlaylists()
+      getAllPlaylists();
     }
-  }, [playlist, getAllPlaylists])
+  }, [playlist, getAllPlaylists]);
 
   const handleDialogClose = React.useCallback((open) => {
-    setIsPlaylistSelectionOpen(open)
+    setIsPlaylistSelectionOpen(open);
     if (!open) {
-      setSelectedPlaylist("")
-      setMenuOpen(false)
+      setSelectedPlaylist("");
+      setMenuOpen(false); // ensure menu is closed on dialog close
     }
-  }, [])
+  }, []);
 
   const handleAddToPlaylist = React.useCallback(async () => {
-    if (!selectedPlaylist || !problem?.id) return
-
+    if (!selectedPlaylist || !problem?.id) return;
     try {
-      await addProblemToPlaylist(selectedPlaylist, problem.id)
-      setIsPlaylistSelectionOpen(false)
-      setSelectedPlaylist("")
-      setMenuOpen(false)
+      await addProblemToPlaylist(selectedPlaylist, problem.id);
+      setIsPlaylistSelectionOpen(false);
+      setSelectedPlaylist("");
+      setMenuOpen(false); // also close menu after successful add
     } catch (error) {
-      console.error("Failed to add problem to playlist:", error)
+      console.error("Failed to add problem to playlist:", error);
     }
-  }, [selectedPlaylist, problem?.id, addProblemToPlaylist])
+  }, [selectedPlaylist, problem?.id, addProblemToPlaylist]);
 
   return (
     <>
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="data-[state=open]:bg-muted text-muted-foreground flex size-8" size="icon">
+          <Button
+            variant="ghost"
+            className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
+            size="icon"
+          >
             <IconDotsVertical />
             <span className="sr-only">Open menu</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-32">
-          <DropdownMenuItem onClick={handleDialogOpen}>Add to Playlist</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleDialogOpen}>
+            Add to Playlist
+          </DropdownMenuItem>
           {authUser?.role === "ADMIN" && (
             <>
               <DropdownMenuItem>Edit</DropdownMenuItem>
@@ -152,25 +176,46 @@ const ActionsDropdown = React.memo(({ problem }) => {
           <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
               <DialogTitle>Add to Playlist</DialogTitle>
-              <DialogDescription>Choose a playlist to add "{problem?.title || "this problem"}" to.</DialogDescription>
+              <DialogDescription>
+                Choose a playlist to add "{problem?.title || "this problem"}"
+                to.
+              </DialogDescription>
             </DialogHeader>
 
             <div className="grid gap-4 py-4">
               {isLoading ? (
                 <div className="flex items-center justify-center py-6">
                   <Loader2 className="h-6 w-6 animate-spin" />
-                  <span className="ml-2 text-sm text-muted-foreground">Loading playlists...</span>
+                  <span className="ml-2 text-sm text-muted-foreground">
+                    Loading playlists...
+                  </span>
                 </div>
               ) : validPlaylists.length > 0 ? (
                 <div className="space-y-4">
                   <h4 className="text-sm font-medium">Select a Playlist</h4>
-                  <RadioGroup value={selectedPlaylist} onValueChange={setSelectedPlaylist} className="space-y-3">
+                  <RadioGroup
+                    value={selectedPlaylist}
+                    onValueChange={setSelectedPlaylist}
+                    className="space-y-3"
+                  >
                     {validPlaylists.map((playlist) => (
-                      <div key={playlist.id} className="flex items-start space-x-3 space-y-0">
-                        <RadioGroupItem value={playlist.id.toString()} id={playlist.id.toString()} className="mt-1" />
-                        <Label htmlFor={playlist.id.toString()} className="flex-1 cursor-pointer justify-between">
+                      <div
+                        key={playlist.id}
+                        className="flex items-start space-x-3 space-y-0"
+                      >
+                        <RadioGroupItem
+                          value={playlist.id.toString()}
+                          id={playlist.id.toString()}
+                          className="mt-1"
+                        />
+                        <Label
+                          htmlFor={playlist.id.toString()}
+                          className="flex-1 cursor-pointer justify-between"
+                        >
                           <div className="font-medium">{playlist.name}</div>
-                          <div className="text-sm text-muted-foreground">{playlist.problems?.length || 0} problems</div>
+                          <div className="text-sm text-muted-foreground">
+                            {playlist.problems?.length || 0} problems
+                          </div>
                         </Label>
                       </div>
                     ))}
@@ -178,8 +223,12 @@ const ActionsDropdown = React.memo(({ problem }) => {
                 </div>
               ) : (
                 <div className="text-center py-6 text-muted-foreground">
-                  <div className="text-sm">You don't have any playlists yet.</div>
-                  <div className="text-sm">Create a playlist first to add problems to it.</div>
+                  <div className="text-sm">
+                    You don't have any playlists yet.
+                  </div>
+                  <div className="text-sm">
+                    Create a playlist first to add problems to it.
+                  </div>
                 </div>
               )}
             </div>
@@ -189,7 +238,10 @@ const ActionsDropdown = React.memo(({ problem }) => {
                 <Button variant="outline">Cancel</Button>
               </DialogClose>
               {validPlaylists.length > 0 && (
-                <Button onClick={handleAddToPlaylist} disabled={!selectedPlaylist || isLoading}>
+                <Button
+                  onClick={handleAddToPlaylist}
+                  disabled={!selectedPlaylist || isLoading}
+                >
                   {isLoading ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -205,18 +257,18 @@ const ActionsDropdown = React.memo(({ problem }) => {
         </Dialog>
       )}
     </>
-  )
-})
+  );
+});
 
-ActionsDropdown.displayName = "ActionsDropdown"
+ActionsDropdown.displayName = "ActionsDropdown";
 
 // Memoized Title Cell Component
 const TitleCell = React.memo(({ problem }) => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleTitleClick = React.useCallback(() => {
-    navigate(`/problem/${problem.id}`)
-  }, [navigate, problem.id])
+    navigate(`/problem/${problem.id}`);
+  }, [navigate, problem.id]);
 
   return (
     <Button
@@ -226,10 +278,10 @@ const TitleCell = React.memo(({ problem }) => {
     >
       {problem.title}
     </Button>
-  )
-})
+  );
+});
 
-TitleCell.displayName = "TitleCell"
+TitleCell.displayName = "TitleCell";
 
 // Memoized Tags Cell Component
 const TagsCell = React.memo(({ tags }) => (
@@ -240,9 +292,9 @@ const TagsCell = React.memo(({ tags }) => (
       </Badge>
     ))}
   </div>
-))
+));
 
-TagsCell.displayName = "TagsCell"
+TagsCell.displayName = "TagsCell";
 
 // Memoized column definitions with solved problems logic
 const useColumns = (solvedProblems) =>
@@ -252,24 +304,32 @@ const useColumns = (solvedProblems) =>
         id: "select",
         header: ({ table }) => {
           // Calculate how many rows on current page are solved
-          const currentPageRows = table.getRowModel().rows
-          const solvedRowsOnPage = currentPageRows.filter((row) => solvedProblems.includes(row.original.id))
-          const allPageRowsSolved = currentPageRows.length > 0 && solvedRowsOnPage.length === currentPageRows.length
-          const somePageRowsSolved = solvedRowsOnPage.length > 0 && solvedRowsOnPage.length < currentPageRows.length
+          const currentPageRows = table.getRowModel().rows;
+          const solvedRowsOnPage = currentPageRows.filter((row) =>
+            solvedProblems.includes(row.original.id)
+          );
+          const allPageRowsSolved =
+            currentPageRows.length > 0 &&
+            solvedRowsOnPage.length === currentPageRows.length;
+          const somePageRowsSolved =
+            solvedRowsOnPage.length > 0 &&
+            solvedRowsOnPage.length < currentPageRows.length;
 
           return (
             <div className="flex items-center justify-center">
               <Checkbox
-                checked={allPageRowsSolved || (somePageRowsSolved && "indeterminate")}
+                checked={
+                  allPageRowsSolved || (somePageRowsSolved && "indeterminate")
+                }
                 disabled={true} // Disable manual selection
                 aria-label="Select all"
                 className="cursor-not-allowed"
               />
             </div>
-          )
+          );
         },
         cell: ({ row }) => {
-          const isSolved = solvedProblems.includes(row.original.id)
+          const isSolved = solvedProblems.includes(row.original.id);
           return (
             <div className="flex items-center justify-center">
               <Checkbox
@@ -279,7 +339,7 @@ const useColumns = (solvedProblems) =>
                 className="cursor-not-allowed"
               />
             </div>
-          )
+          );
         },
         enableSorting: false,
         enableHiding: false,
@@ -293,14 +353,18 @@ const useColumns = (solvedProblems) =>
       {
         accessorKey: "difficulty",
         header: "Difficulty",
-        cell: ({ row }) => <DifficultyCell difficulty={row.original.difficulty} />,
+        cell: ({ row }) => (
+          <DifficultyCell difficulty={row.original.difficulty} />
+        ),
       },
       {
         accessorKey: "company",
         header: "Company",
         cell: ({ row }) => (
           <div className="w-24">
-            <span className="text-sm font-medium">{row.original.company || "N/A"}</span>
+            <span className="text-sm font-medium">
+              {row.original.company || "N/A"}
+            </span>
           </div>
         ),
       },
@@ -312,61 +376,74 @@ const useColumns = (solvedProblems) =>
       {
         accessorKey: "acceptance",
         header: () => <div className="text-right">Acceptance</div>,
-        cell: ({ row }) => <div className="text-right font-mono text-sm w-20">{row.original.acceptance || "N/A"}</div>,
+        cell: ({ row }) => (
+          <div className="text-right font-mono text-sm w-20">
+            {row.original.acceptance || "N/A"}
+          </div>
+        ),
       },
       {
         id: "actions",
         cell: ({ row }) => <ActionsDropdown problem={row.original} />,
       },
     ],
-    [JSON.stringify(solvedProblems)],
-  )
+    [JSON.stringify(solvedProblems)]
+  );
 
 // Custom hook for filter logic
 const useFilters = (data) => {
-  const [searchTerm, setSearchTerm] = React.useState("")
-  const [companyFilter, setCompanyFilter] = React.useState("all")
-  const [difficultyFilter, setDifficultyFilter] = React.useState("all")
-  const [tagsFilter, setTagsFilter] = React.useState("all")
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [companyFilter, setCompanyFilter] = React.useState("all");
+  const [difficultyFilter, setDifficultyFilter] = React.useState("all");
+  const [tagsFilter, setTagsFilter] = React.useState("all");
 
-  // Memoized unique values for filters
   const companies = React.useMemo(() => {
-    const uniqueCompanies = Array.from(new Set(data.map((item) => item.company).filter(Boolean)))
-    return uniqueCompanies.sort()
-  }, [data])
+    const uniqueCompanies = Array.from(
+      new Set(data.map((item) => item.company).filter(Boolean))
+    );
+    return uniqueCompanies.sort();
+  }, [data]);
 
   const allTags = React.useMemo(() => {
-    const tags = data.flatMap((item) => item.tags || [])
-    return Array.from(new Set(tags)).sort()
-  }, [data])
+    const tags = data.flatMap((item) => item.tags || []);
+    return Array.from(new Set(tags)).sort();
+  }, [data]);
 
-  // Memoized filtered data with debounced search
-  const debouncedSearchTerm = React.useMemo(() => searchTerm, [searchTerm])
+  const deferredSearch = React.useDeferredValue(searchTerm);
 
   const filteredData = React.useMemo(() => {
     return data.filter((item) => {
       const matchesSearch =
-        !debouncedSearchTerm ||
-        item.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
-        item.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+        !deferredSearch ||
+        item.title.toLowerCase().includes(deferredSearch.toLowerCase()) ||
+        item.description.toLowerCase().includes(deferredSearch.toLowerCase());
 
-      const matchesCompany = companyFilter === "all" || item.company === companyFilter
+      const matchesCompany =
+        companyFilter === "all" || item.company === companyFilter;
       const matchesDifficulty =
-        difficultyFilter === "all" || item.difficulty.toLowerCase() === difficultyFilter.toLowerCase()
-      const matchesTags = tagsFilter === "all" || (item.tags && item.tags.includes(tagsFilter))
+        difficultyFilter === "all" ||
+        item.difficulty.toLowerCase() === difficultyFilter.toLowerCase();
+      const matchesTags =
+        tagsFilter === "all" || (item.tags && item.tags.includes(tagsFilter));
 
-      return matchesSearch && matchesCompany && matchesDifficulty && matchesTags
-    })
-  }, [data, debouncedSearchTerm, companyFilter, difficultyFilter, tagsFilter])
+      return (
+        matchesSearch && matchesCompany && matchesDifficulty && matchesTags
+      );
+    });
+  }, [data, deferredSearch, companyFilter, difficultyFilter, tagsFilter]);
 
   const clearFilters = React.useCallback(() => {
-    setSearchTerm("")
-    setCompanyFilter("all")
-    setDifficultyFilter("all")
-    setTagsFilter("all")
-  }, [])
+    setSearchTerm("");
+    setCompanyFilter("all");
+    setDifficultyFilter("all");
+    setTagsFilter("all");
+  }, []);
 
-  const hasActiveFilters = searchTerm || companyFilter !== "all" || difficultyFilter !== "all" || tagsFilter !== "all"
+  const hasActiveFilters =
+    searchTerm ||
+    companyFilter !== "all" ||
+    difficultyFilter !== "all" ||
+    tagsFilter !== "all";
 
   return {
     searchTerm,
@@ -382,57 +459,65 @@ const useFilters = (data) => {
     filteredData,
     clearFilters,
     hasActiveFilters,
-  }
-}
+  };
+};
 
 // Memoized Filter Summary Component
-const FilterSummary = React.memo(({ searchTerm, companyFilter, difficultyFilter, tagsFilter, resultCount }) => (
-  <div className="flex items-center gap-2 text-sm text-muted-foreground px-2">
-    <span>Filters applied:</span>
-    {searchTerm && (
-      <Badge variant="secondary" className="text-xs">
-        Search: "{searchTerm}"
-      </Badge>
-    )}
-    {companyFilter !== "all" && (
-      <Badge variant="secondary" className="text-xs">
-        Company: {companyFilter}
-      </Badge>
-    )}
-    {difficultyFilter !== "all" && (
-      <Badge variant="secondary" className="text-xs">
-        Difficulty: {difficultyFilter}
-      </Badge>
-    )}
-    {tagsFilter !== "all" && (
-      <Badge variant="secondary" className="text-xs">
-        Tag: {tagsFilter}
-      </Badge>
-    )}
-    <span>({resultCount} total results)</span>
-  </div>
-))
+const FilterSummary = React.memo(
+  ({
+    searchTerm,
+    companyFilter,
+    difficultyFilter,
+    tagsFilter,
+    resultCount,
+  }) => (
+    <div className="flex items-center gap-2 text-sm text-muted-foreground px-2">
+      <span>Filters applied:</span>
+      {searchTerm && (
+        <Badge variant="secondary" className="text-xs">
+          Search: "{searchTerm}"
+        </Badge>
+      )}
+      {companyFilter !== "all" && (
+        <Badge variant="secondary" className="text-xs">
+          Company: {companyFilter}
+        </Badge>
+      )}
+      {difficultyFilter !== "all" && (
+        <Badge variant="secondary" className="text-xs">
+          Difficulty: {difficultyFilter}
+        </Badge>
+      )}
+      {tagsFilter !== "all" && (
+        <Badge variant="secondary" className="text-xs">
+          Tag: {tagsFilter}
+        </Badge>
+      )}
+      <span>({resultCount} total results)</span>
+    </div>
+  )
+);
 
-FilterSummary.displayName = "FilterSummary"
+FilterSummary.displayName = "FilterSummary";
 
 export function DataTable({ data: initialData, solvedProblems = [] }) {
   // Extract solved problem IDs from the data structure
   const solvedProblemIds = React.useMemo(() => {
-    if (!initialData) return []
+    if (!initialData) return [];
 
-    const solvedIds = new Set()
+    const solvedIds = new Set();
     initialData.forEach((problem) => {
       if (problem.ProblemSolved && problem.ProblemSolved.length > 0) {
-        solvedIds.add(problem.id)
+        solvedIds.add(problem.id);
       }
-    })
+    });
 
     // Also include any IDs from the solvedProblems prop
-    solvedProblems.forEach((id) => solvedIds.add(id))
+    solvedProblems.forEach((id) => solvedIds.add(id));
 
-    return Array.from(solvedIds)
-  }, [initialData, solvedProblems])
-  const columns = useColumns(solvedProblemIds)
+    return Array.from(solvedIds);
+  }, [initialData, solvedProblems]);
+  const columns = useColumns(solvedProblemIds);
 
   const {
     searchTerm,
@@ -448,27 +533,27 @@ export function DataTable({ data: initialData, solvedProblems = [] }) {
     filteredData,
     clearFilters,
     hasActiveFilters,
-  } = useFilters(initialData)
+  } = useFilters(initialData);
 
   // Table state - removed rowSelection as it's now controlled by solvedProblems
-  const [columnVisibility, setColumnVisibility] = React.useState({})
-  const [columnFilters, setColumnFilters] = React.useState([])
-  const [sorting, setSorting] = React.useState([])
+  const [columnVisibility, setColumnVisibility] = React.useState({});
+  const [columnFilters, setColumnFilters] = React.useState([]);
+  const [sorting, setSorting] = React.useState([]);
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
-  })
+  });
 
   // Create row selection state based on solved problems
   const rowSelection = React.useMemo(() => {
-    const selection = {}
+    const selection = {};
     filteredData.forEach((item) => {
       if (solvedProblemIds.includes(item.id)) {
-        selection[item.id] = true
+        selection[item.id] = true;
       }
-    })
-    return selection
-  }, [filteredData, solvedProblemIds])
+    });
+    return selection;
+  }, [filteredData, solvedProblemIds]);
 
   const table = useReactTable({
     data: filteredData,
@@ -492,16 +577,17 @@ export function DataTable({ data: initialData, solvedProblems = [] }) {
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-  })
+  });
 
   // Calculate solved problems count for display
   const solvedProblemsCount = React.useMemo(() => {
-    return filteredData.filter((item) => solvedProblemIds.includes(item.id)).length
-  }, [filteredData, solvedProblemIds])
+    return filteredData.filter((item) => solvedProblemIds.includes(item.id))
+      .length;
+  }, [filteredData, solvedProblemIds]);
 
   // Add CSS for hiding scrollbar
   React.useEffect(() => {
-    const style = document.createElement("style")
+    const style = document.createElement("style");
     style.textContent = `
       .data-table-container, .data-table-scroll {
         scrollbar-width: none !important; /* Firefox */
@@ -522,15 +608,15 @@ export function DataTable({ data: initialData, solvedProblems = [] }) {
       .data-table-scroll::-webkit-scrollbar-thumb {
         display: none !important;
       }
-    `
-    document.head.appendChild(style)
+    `;
+    document.head.appendChild(style);
 
     return () => {
       if (document.head.contains(style)) {
-        document.head.removeChild(style)
+        document.head.removeChild(style);
       }
-    }
-  }, [])
+    };
+  }, []);
 
   return (
     <div className="w-full flex-col justify-start gap-6">
@@ -561,7 +647,10 @@ export function DataTable({ data: initialData, solvedProblems = [] }) {
               </SelectContent>
             </Select>
 
-            <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
+            <Select
+              value={difficultyFilter}
+              onValueChange={setDifficultyFilter}
+            >
               <SelectTrigger className="w-full sm:w-28">
                 <SelectValue placeholder="Difficulty" />
               </SelectTrigger>
@@ -629,7 +718,12 @@ export function DataTable({ data: initialData, solvedProblems = [] }) {
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => (
                       <TableHead key={header.id} colSpan={header.colSpan}>
-                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
                       </TableHead>
                     ))}
                   </TableRow>
@@ -640,13 +734,21 @@ export function DataTable({ data: initialData, solvedProblems = [] }) {
                   table.getRowModel().rows.map((row) => (
                     <TableRow key={row.id}>
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
                       ))}
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
                       No results found. Try adjusting your filters.
                     </TableCell>
                   </TableRow>
@@ -659,7 +761,8 @@ export function DataTable({ data: initialData, solvedProblems = [] }) {
         {/* Pagination controls */}
         <div className="flex items-center justify-between px-4">
           <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
-            {solvedProblemsCount} of {table.getFilteredRowModel().rows.length} problem(s) solved.
+            {solvedProblemsCount} of {table.getFilteredRowModel().rows.length}{" "}
+            problem(s) solved.
           </div>
           <div className="flex w-full items-center gap-8 lg:w-fit">
             <div className="hidden items-center gap-2 lg:flex">
@@ -671,7 +774,9 @@ export function DataTable({ data: initialData, solvedProblems = [] }) {
                 onValueChange={(value) => table.setPageSize(Number(value))}
               >
                 <SelectTrigger size="sm" className="w-20" id="rows-per-page">
-                  <SelectValue placeholder={table.getState().pagination.pageSize} />
+                  <SelectValue
+                    placeholder={table.getState().pagination.pageSize}
+                  />
                 </SelectTrigger>
                 <SelectContent side="top">
                   {[10, 20, 30, 40, 50].map((pageSize) => (
@@ -683,7 +788,8 @@ export function DataTable({ data: initialData, solvedProblems = [] }) {
               </Select>
             </div>
             <div className="flex w-fit items-center justify-center text-sm font-medium">
-              Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+              Page {table.getState().pagination.pageIndex + 1} of{" "}
+              {table.getPageCount()}
             </div>
             <div className="ml-auto flex items-center gap-2 lg:ml-0">
               <Button
@@ -730,5 +836,5 @@ export function DataTable({ data: initialData, solvedProblems = [] }) {
         </div>
       </div>
     </div>
-  )
+  );
 }
