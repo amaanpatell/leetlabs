@@ -60,14 +60,15 @@ export const schema = z.object({
 // Difficulty styles mapping - moved outside component for better performance
 const DIFFICULTY_STYLES = {
   easy: "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800",
-  medium: "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800",
+  medium:
+    "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800",
   hard: "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800",
-  default: "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800"
+  default: "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800",
 }
 
 // Memoized Difficulty Cell Component
 const DifficultyCell = React.memo(({ difficulty }) => {
-  const styleKey = difficulty?.toLowerCase() || 'default'
+  const styleKey = difficulty?.toLowerCase() || "default"
   const style = DIFFICULTY_STYLES[styleKey] || DIFFICULTY_STYLES.default
 
   return (
@@ -79,9 +80,8 @@ const DifficultyCell = React.memo(({ difficulty }) => {
   )
 })
 
-DifficultyCell.displayName = 'DifficultyCell'
+DifficultyCell.displayName = "DifficultyCell"
 
-// Memoized Actions Dropdown
 // Memoized Actions Dropdown
 const ActionsDropdown = React.memo(({ problem }) => {
   const { authUser } = useAuthStore()
@@ -89,6 +89,7 @@ const ActionsDropdown = React.memo(({ problem }) => {
 
   const [isPlaylistSelectionOpen, setIsPlaylistSelectionOpen] = React.useState(false)
   const [selectedPlaylist, setSelectedPlaylist] = React.useState("")
+  const [menuOpen, setMenuOpen] = React.useState(false)
 
   // Memoize valid playlists with null check
   const validPlaylists = React.useMemo(() => {
@@ -97,6 +98,7 @@ const ActionsDropdown = React.memo(({ problem }) => {
   }, [playlist])
 
   const handleDialogOpen = React.useCallback(() => {
+    setMenuOpen(false)
     setIsPlaylistSelectionOpen(true)
     if (!playlist || playlist.length === 0) {
       getAllPlaylists()
@@ -107,6 +109,7 @@ const ActionsDropdown = React.memo(({ problem }) => {
     setIsPlaylistSelectionOpen(open)
     if (!open) {
       setSelectedPlaylist("")
+      setMenuOpen(false)
     }
   }, [])
 
@@ -117,6 +120,7 @@ const ActionsDropdown = React.memo(({ problem }) => {
       await addProblemToPlaylist(selectedPlaylist, problem.id)
       setIsPlaylistSelectionOpen(false)
       setSelectedPlaylist("")
+      setMenuOpen(false)
     } catch (error) {
       console.error("Failed to add problem to playlist:", error)
     }
@@ -124,7 +128,7 @@ const ActionsDropdown = React.memo(({ problem }) => {
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="data-[state=open]:bg-muted text-muted-foreground flex size-8" size="icon">
             <IconDotsVertical />
@@ -143,66 +147,68 @@ const ActionsDropdown = React.memo(({ problem }) => {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Dialog open={isPlaylistSelectionOpen} onOpenChange={handleDialogClose}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Add to Playlist</DialogTitle>
-            <DialogDescription>Choose a playlist to add "{problem?.title || "this problem"}" to.</DialogDescription>
-          </DialogHeader>
+      {isPlaylistSelectionOpen && (
+        <Dialog open={isPlaylistSelectionOpen} onOpenChange={handleDialogClose}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Add to Playlist</DialogTitle>
+              <DialogDescription>Choose a playlist to add "{problem?.title || "this problem"}" to.</DialogDescription>
+            </DialogHeader>
 
-          <div className="grid gap-4 py-4">
-            {isLoading ? (
-              <div className="flex items-center justify-center py-6">
-                <Loader2 className="h-6 w-6 animate-spin" />
-                <span className="ml-2 text-sm text-muted-foreground">Loading playlists...</span>
-              </div>
-            ) : validPlaylists.length > 0 ? (
-              <div className="space-y-4">
-                <h4 className="text-sm font-medium">Select a Playlist</h4>
-                <RadioGroup value={selectedPlaylist} onValueChange={setSelectedPlaylist} className="space-y-3">
-                  {validPlaylists.map((playlist) => (
-                    <div key={playlist.id} className="flex items-start space-x-3 space-y-0">
-                      <RadioGroupItem value={playlist.id.toString()} id={playlist.id.toString()} className="mt-1" />
-                      <Label htmlFor={playlist.id.toString()} className="flex-1 cursor-pointer justify-between">
-                        <div className="font-medium">{playlist.name}</div>
-                        <div className="text-sm text-muted-foreground">{playlist.problems?.length || 0} problems</div>
-                      </Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-              </div>
-            ) : (
-              <div className="text-center py-6 text-muted-foreground">
-                <div className="text-sm">You don't have any playlists yet.</div>
-                <div className="text-sm">Create a playlist first to add problems to it.</div>
-              </div>
-            )}
-          </div>
+            <div className="grid gap-4 py-4">
+              {isLoading ? (
+                <div className="flex items-center justify-center py-6">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <span className="ml-2 text-sm text-muted-foreground">Loading playlists...</span>
+                </div>
+              ) : validPlaylists.length > 0 ? (
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium">Select a Playlist</h4>
+                  <RadioGroup value={selectedPlaylist} onValueChange={setSelectedPlaylist} className="space-y-3">
+                    {validPlaylists.map((playlist) => (
+                      <div key={playlist.id} className="flex items-start space-x-3 space-y-0">
+                        <RadioGroupItem value={playlist.id.toString()} id={playlist.id.toString()} className="mt-1" />
+                        <Label htmlFor={playlist.id.toString()} className="flex-1 cursor-pointer justify-between">
+                          <div className="font-medium">{playlist.name}</div>
+                          <div className="text-sm text-muted-foreground">{playlist.problems?.length || 0} problems</div>
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
+              ) : (
+                <div className="text-center py-6 text-muted-foreground">
+                  <div className="text-sm">You don't have any playlists yet.</div>
+                  <div className="text-sm">Create a playlist first to add problems to it.</div>
+                </div>
+              )}
+            </div>
 
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose>
-            {validPlaylists.length > 0 && (
-              <Button onClick={handleAddToPlaylist} disabled={!selectedPlaylist || isLoading}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Adding...
-                  </>
-                ) : (
-                  "Add to Playlist"
-                )}
-              </Button>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">Cancel</Button>
+              </DialogClose>
+              {validPlaylists.length > 0 && (
+                <Button onClick={handleAddToPlaylist} disabled={!selectedPlaylist || isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Adding...
+                    </>
+                  ) : (
+                    "Add to Playlist"
+                  )}
+                </Button>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   )
 })
 
-ActionsDropdown.displayName = 'ActionsDropdown'
+ActionsDropdown.displayName = "ActionsDropdown"
 
 // Memoized Title Cell Component
 const TitleCell = React.memo(({ problem }) => {
@@ -223,9 +229,9 @@ const TitleCell = React.memo(({ problem }) => {
   )
 })
 
-TitleCell.displayName = 'TitleCell'
+TitleCell.displayName = "TitleCell"
 
-// Memoized Tags Cell Component  
+// Memoized Tags Cell Component
 const TagsCell = React.memo(({ tags }) => (
   <div className="flex flex-wrap gap-1 max-w-48">
     {tags?.slice(0, 2).map((tag, index) => (
@@ -236,85 +242,85 @@ const TagsCell = React.memo(({ tags }) => (
   </div>
 ))
 
-TagsCell.displayName = 'TagsCell'
+TagsCell.displayName = "TagsCell"
 
 // Memoized column definitions with solved problems logic
-const useColumns = (solvedProblems) => React.useMemo(() => [
-  {
-    id: "select",
-    header: ({ table }) => {
-      // Calculate how many rows on current page are solved
-      const currentPageRows = table.getRowModel().rows
-      const solvedRowsOnPage = currentPageRows.filter(row => 
-        solvedProblems.includes(row.original.id)
-      )
-      const allPageRowsSolved = currentPageRows.length > 0 && 
-        solvedRowsOnPage.length === currentPageRows.length
-      const somePageRowsSolved = solvedRowsOnPage.length > 0 && 
-        solvedRowsOnPage.length < currentPageRows.length
+const useColumns = (solvedProblems) =>
+  React.useMemo(
+    () => [
+      {
+        id: "select",
+        header: ({ table }) => {
+          // Calculate how many rows on current page are solved
+          const currentPageRows = table.getRowModel().rows
+          const solvedRowsOnPage = currentPageRows.filter((row) => solvedProblems.includes(row.original.id))
+          const allPageRowsSolved = currentPageRows.length > 0 && solvedRowsOnPage.length === currentPageRows.length
+          const somePageRowsSolved = solvedRowsOnPage.length > 0 && solvedRowsOnPage.length < currentPageRows.length
 
-      return (
-        <div className="flex items-center justify-center">
-          <Checkbox
-            checked={allPageRowsSolved || (somePageRowsSolved && "indeterminate")}
-            disabled={true} // Disable manual selection
-            aria-label="Select all"
-            className="cursor-not-allowed"
-          />
-        </div>
-      )
-    },
-    cell: ({ row }) => {
-      const isSolved = solvedProblems.includes(row.original.id)
-      return (
-        <div className="flex items-center justify-center">
-          <Checkbox
-            checked={isSolved}
-            disabled={true} // Disable manual selection
-            aria-label="Select row"
-            className="cursor-not-allowed"
-          />
-        </div>
-      )
-    },
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "title",
-    header: "Title",
-    cell: ({ row }) => <TitleCell problem={row.original} />,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "difficulty",
-    header: "Difficulty", 
-    cell: ({ row }) => <DifficultyCell difficulty={row.original.difficulty} />,
-  },
-  {
-    accessorKey: "company",
-    header: "Company",
-    cell: ({ row }) => (
-      <div className="w-24">
-        <span className="text-sm font-medium">{row.original.company || "N/A"}</span>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "tags",
-    header: "Tags",
-    cell: ({ row }) => <TagsCell tags={row.original.tags} />,
-  },
-  {
-    accessorKey: "acceptance",
-    header: () => <div className="text-right">Acceptance</div>,
-    cell: ({ row }) => <div className="text-right font-mono text-sm w-20">{row.original.acceptance || "N/A"}</div>,
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => <ActionsDropdown problem={row.original} />,
-  },
-], [JSON.stringify(solvedProblems)])
+          return (
+            <div className="flex items-center justify-center">
+              <Checkbox
+                checked={allPageRowsSolved || (somePageRowsSolved && "indeterminate")}
+                disabled={true} // Disable manual selection
+                aria-label="Select all"
+                className="cursor-not-allowed"
+              />
+            </div>
+          )
+        },
+        cell: ({ row }) => {
+          const isSolved = solvedProblems.includes(row.original.id)
+          return (
+            <div className="flex items-center justify-center">
+              <Checkbox
+                checked={isSolved}
+                disabled={true} // Disable manual selection
+                aria-label="Select row"
+                className="cursor-not-allowed"
+              />
+            </div>
+          )
+        },
+        enableSorting: false,
+        enableHiding: false,
+      },
+      {
+        accessorKey: "title",
+        header: "Title",
+        cell: ({ row }) => <TitleCell problem={row.original} />,
+        enableHiding: false,
+      },
+      {
+        accessorKey: "difficulty",
+        header: "Difficulty",
+        cell: ({ row }) => <DifficultyCell difficulty={row.original.difficulty} />,
+      },
+      {
+        accessorKey: "company",
+        header: "Company",
+        cell: ({ row }) => (
+          <div className="w-24">
+            <span className="text-sm font-medium">{row.original.company || "N/A"}</span>
+          </div>
+        ),
+      },
+      {
+        accessorKey: "tags",
+        header: "Tags",
+        cell: ({ row }) => <TagsCell tags={row.original.tags} />,
+      },
+      {
+        accessorKey: "acceptance",
+        header: () => <div className="text-right">Acceptance</div>,
+        cell: ({ row }) => <div className="text-right font-mono text-sm w-20">{row.original.acceptance || "N/A"}</div>,
+      },
+      {
+        id: "actions",
+        cell: ({ row }) => <ActionsDropdown problem={row.original} />,
+      },
+    ],
+    [JSON.stringify(solvedProblems)],
+  )
 
 // Custom hook for filter logic
 const useFilters = (data) => {
@@ -325,27 +331,28 @@ const useFilters = (data) => {
 
   // Memoized unique values for filters
   const companies = React.useMemo(() => {
-    const uniqueCompanies = Array.from(new Set(data.map(item => item.company).filter(Boolean)))
+    const uniqueCompanies = Array.from(new Set(data.map((item) => item.company).filter(Boolean)))
     return uniqueCompanies.sort()
   }, [data])
 
   const allTags = React.useMemo(() => {
-    const tags = data.flatMap(item => item.tags || [])
+    const tags = data.flatMap((item) => item.tags || [])
     return Array.from(new Set(tags)).sort()
   }, [data])
 
   // Memoized filtered data with debounced search
   const debouncedSearchTerm = React.useMemo(() => searchTerm, [searchTerm])
-  
+
   const filteredData = React.useMemo(() => {
-    return data.filter(item => {
-      const matchesSearch = !debouncedSearchTerm || 
+    return data.filter((item) => {
+      const matchesSearch =
+        !debouncedSearchTerm ||
         item.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
         item.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
 
       const matchesCompany = companyFilter === "all" || item.company === companyFilter
-      const matchesDifficulty = difficultyFilter === "all" || 
-        item.difficulty.toLowerCase() === difficultyFilter.toLowerCase()
+      const matchesDifficulty =
+        difficultyFilter === "all" || item.difficulty.toLowerCase() === difficultyFilter.toLowerCase()
       const matchesTags = tagsFilter === "all" || (item.tags && item.tags.includes(tagsFilter))
 
       return matchesSearch && matchesCompany && matchesDifficulty && matchesTags
@@ -359,8 +366,7 @@ const useFilters = (data) => {
     setTagsFilter("all")
   }, [])
 
-  const hasActiveFilters = searchTerm || companyFilter !== "all" || 
-    difficultyFilter !== "all" || tagsFilter !== "all"
+  const hasActiveFilters = searchTerm || companyFilter !== "all" || difficultyFilter !== "all" || tagsFilter !== "all"
 
   return {
     searchTerm,
@@ -375,7 +381,7 @@ const useFilters = (data) => {
     allTags,
     filteredData,
     clearFilters,
-    hasActiveFilters
+    hasActiveFilters,
   }
 }
 
@@ -407,27 +413,27 @@ const FilterSummary = React.memo(({ searchTerm, companyFilter, difficultyFilter,
   </div>
 ))
 
-FilterSummary.displayName = 'FilterSummary'
+FilterSummary.displayName = "FilterSummary"
 
 export function DataTable({ data: initialData, solvedProblems = [] }) {
   // Extract solved problem IDs from the data structure
   const solvedProblemIds = React.useMemo(() => {
     if (!initialData) return []
-    
+
     const solvedIds = new Set()
-    initialData.forEach(problem => {
+    initialData.forEach((problem) => {
       if (problem.ProblemSolved && problem.ProblemSolved.length > 0) {
         solvedIds.add(problem.id)
       }
     })
-    
+
     // Also include any IDs from the solvedProblems prop
-    solvedProblems.forEach(id => solvedIds.add(id))
-    
+    solvedProblems.forEach((id) => solvedIds.add(id))
+
     return Array.from(solvedIds)
   }, [initialData, solvedProblems])
   const columns = useColumns(solvedProblemIds)
-  
+
   const {
     searchTerm,
     setSearchTerm,
@@ -441,7 +447,7 @@ export function DataTable({ data: initialData, solvedProblems = [] }) {
     allTags,
     filteredData,
     clearFilters,
-    hasActiveFilters
+    hasActiveFilters,
   } = useFilters(initialData)
 
   // Table state - removed rowSelection as it's now controlled by solvedProblems
@@ -456,7 +462,7 @@ export function DataTable({ data: initialData, solvedProblems = [] }) {
   // Create row selection state based on solved problems
   const rowSelection = React.useMemo(() => {
     const selection = {}
-    filteredData.forEach(item => {
+    filteredData.forEach((item) => {
       if (solvedProblemIds.includes(item.id)) {
         selection[item.id] = true
       }
@@ -490,12 +496,12 @@ export function DataTable({ data: initialData, solvedProblems = [] }) {
 
   // Calculate solved problems count for display
   const solvedProblemsCount = React.useMemo(() => {
-    return filteredData.filter(item => solvedProblemIds.includes(item.id)).length
+    return filteredData.filter((item) => solvedProblemIds.includes(item.id)).length
   }, [filteredData, solvedProblemIds])
 
   // Add CSS for hiding scrollbar
   React.useEffect(() => {
-    const style = document.createElement('style')
+    const style = document.createElement("style")
     style.textContent = `
       .data-table-container, .data-table-scroll {
         scrollbar-width: none !important; /* Firefox */
@@ -518,7 +524,7 @@ export function DataTable({ data: initialData, solvedProblems = [] }) {
       }
     `
     document.head.appendChild(style)
-    
+
     return () => {
       if (document.head.contains(style)) {
         document.head.removeChild(style)
@@ -601,51 +607,51 @@ export function DataTable({ data: initialData, solvedProblems = [] }) {
         )}
       </div>
 
-      <div 
+      <div
         className="relative flex flex-col gap-4 overflow-auto data-table-container px-4 lg:px-6"
         style={{
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-          WebkitScrollbar: 'none'
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          WebkitScrollbar: "none",
         }}
       >
         <div className="overflow-hidden rounded-lg border">
-          <div 
+          <div
             className="overflow-auto data-table-scroll"
             style={{
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none'
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
             }}
           >
             <Table>
-            <TableHeader className="bg-muted sticky top-0 z-10">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id} colSpan={header.colSpan}>
-                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+              <TableHeader className="bg-muted sticky top-0 z-10">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead key={header.id} colSpan={header.colSpan}>
+                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableHead>
                     ))}
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    No results found. Try adjusting your filters.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                      No results found. Try adjusting your filters.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
             </Table>
           </div>
         </div>

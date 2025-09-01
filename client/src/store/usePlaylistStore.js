@@ -8,122 +8,139 @@ export const usePlaylistStore = create((set, get) => ({
   isLoading: false,
   error: null,
 
+  // Helper function to handle API errors
+  handleError: (error, defaultMessage) => {
+    const errorMessage = error.response?.data?.message || 
+                        error.response?.data?.error || 
+                        error.message || 
+                        defaultMessage;
+    set({ isLoading: false, error: errorMessage });
+    toast.error(errorMessage);
+    return errorMessage;
+  },
+
   createPlaylist: async (playlistData) => {
     try {
-      set({ isLoading: true });
-      const response = await axiosInstance.post(
-        "/playlist/create-playlist",
-        playlistData
-      );
+      set({ isLoading: true, error: null });
+      
+      const response = await axiosInstance.post("/playlist/create-playlist", playlistData);
+      const newPlaylist = response.data?.data || response.data;
 
       set((state) => ({
-        playlist: [...state.playlist, response.data.data.playList],
-        isLoading: false
+        playlist: [...state.playlist, newPlaylist],
+        isLoading: false,
+        error: null
       }));
 
       toast.success("Playlist created successfully");
-      return response.data.data;
+      return response.data;
     } catch (error) {
-      console.error("Error creating playlist:", error);
-      toast.error(error.response?.data?.error || "Failed to create playlist");
-      set({ isLoading: false });
+      get().handleError(error, "Failed to create playlist");
       throw error;
     }
   },
 
   getAllPlaylists: async () => {
     try {
-      set({ isLoading: true });
+      set({ isLoading: true, error: null });
+      
       const response = await axiosInstance.get("/playlist");
-      set({ 
-        playlist: response.data.data || [], 
-        isLoading: false 
+      const playlists = response.data?.data || [];
+
+      set({
+        playlist: Array.isArray(playlists) ? playlists : [],
+        isLoading: false,
+        error: null
       });
     } catch (error) {
-      console.error("Error fetching playlists:", error);
-      toast.error("Failed to fetch playlists");
-      set({ 
-        isLoading: false,
-        playlist: []
-      });
+      get().handleError(error, "Failed to fetch playlists");
     }
   },
 
   getPlaylistDetails: async (playlistId) => {
     try {
-      set({ isLoading: true });
+      set({ isLoading: true, error: null });
+      
       const response = await axiosInstance.get(`/playlist/${playlistId}`);
-      set({ 
-        currentPlaylist: response.data.data,
-        isLoading: false 
+      const playlistDetails = response.data?.data || response.data;
+
+      set({
+        currentPlaylist: playlistDetails,
+        isLoading: false,
+        error: null
       });
+
+      return playlistDetails;
     } catch (error) {
-      console.error("Error fetching playlist details:", error);
-      toast.error("Failed to fetch playlist details");
-      set({ isLoading: false });
+      get().handleError(error, "Failed to fetch playlist details");
+      throw error;
     }
   },
 
   addProblemToPlaylist: async (playlistId, problemId) => {
     try {
-      set({ isLoading: true });
-      await axiosInstance.post(`/playlist/${playlistId}/add-problem`, {
-        problemId,
-      });
-
+      set({ isLoading: true, error: null });
+      
+      await axiosInstance.post(`/playlist/${playlistId}/add-problem`, { problemId });
+      
       toast.success("Problem added to playlist");
-
-      // Refresh the playlist details
-      if (get().currentPlaylist?.id === playlistId) {
-        await get().getPlaylistDetails(playlistId);
-      }
-    } catch (error) {
-      console.error("Error adding problem to playlist:", error);
-      toast.error("Failed to add problem to playlist");
-    } finally {
+      await get().refreshPlaylistData(playlistId);
+      
       set({ isLoading: false });
+    } catch (error) {
+      get().handleError(error, "Failed to add problem to playlist");
+      throw error;
     }
   },
 
-  removeProblemFromPlaylist: async (playlistId, problemId) => {
+  removeProblemFromPlaylist: async (playlistId, problemIds) => {
     try {
-      set({ isLoading: true });
-      await axiosInstance.post(`/playlist/${playlistId}/remove-problems`, {
-        problemId,
+      set({ isLoading: true, error: null });
+      
+      const problemIdsArray = Array.isArray(problemIds) ? problemIds : [problemIds];
+      
+      await axiosInstance({
+        method: 'DELETE',
+        url: `/playlist/${playlistId}/remove-problem`,
+        data: { problemIds: problemIdsArray },
+        headers: { 'Content-Type': 'application/json' }
       });
 
       toast.success("Problem removed from playlist");
-
-      // Refresh the playlist details
-      if (get().currentPlaylist?.id === playlistId) {
-        await get().getPlaylistDetails(playlistId);
-      }
-    } catch (error) {
-      console.error("Error removing problem from playlist:", error);
-      toast.error("Failed to remove problem from playlist");
-    } finally {
+      await get().refreshPlaylistData(playlistId);
+      
       set({ isLoading: false });
+    } catch (error) {
+      get().handleError(error, "Failed to remove problem from playlist");
+      throw error;
     }
   },
 
   deletePlaylist: async (playlistId) => {
     try {
+      set({ error: null });
+      
       await axiosInstance.delete(`/playlist/${playlistId}`);
 
-      // Update state immediately after successful API call
       set((state) => ({
-        playlist: (state.playlist || []).filter((p) => p.id !== playlistId),
+        playlist: state.playlist.filter((p) => p.id !== playlistId),
         currentPlaylist: state.currentPlaylist?.id === playlistId ? null : state.currentPlaylist,
         error: null
       }));
 
       toast.success("Playlist deleted successfully");
-      
     } catch (error) {
-      console.error("Error deleting playlist:", error);
-      set({ error: error.message });
-      toast.error("Failed to delete playlist");
-      throw error;
+      const errorMessage = get().handleError(error, "Failed to delete playlist");
+      throw new Error(errorMessage);
     }
+  },
+
+  // Helper function to refresh playlist data
+  refreshPlaylistData: async (playlistId) => {
+    const currentState = get();
+    if (currentState.currentPlaylist?.id === playlistId) {
+      await get().getPlaylistDetails(playlistId);
+    }
+    await get().getAllPlaylists();
   },
 }));

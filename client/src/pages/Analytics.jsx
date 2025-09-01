@@ -1,4 +1,7 @@
+"use client"
+
 import { useState, useEffect, useCallback } from "react"
+import { useNavigate } from "react-router-dom"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -39,53 +42,193 @@ import {
   Trash2,
   MoreVertical,
   Loader2,
+  ExternalLink,
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { usePlaylistStore } from "@/store/usePlaylistStore"
 
+// Utility functions
 const getDifficultyColor = (difficulty) => {
-  switch (difficulty?.toUpperCase()) {
-    case "EASY":
-      return "text-green-600 bg-green-50 border-green-200"
-    case "MEDIUM":
-      return "text-yellow-600 bg-yellow-50 border-yellow-200"
-    case "HARD":
-      return "text-red-600 bg-red-50 border-red-200"
-    default:
-      return "text-gray-600 bg-gray-50 border-gray-200"
+  const colors = {
+    EASY: "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800",
+    MEDIUM:
+      "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800",
+    HARD: "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800",
   }
+  return colors[difficulty?.toUpperCase()] || "text-gray-600 bg-gray-50 border-gray-200"
 }
 
-const getStatusIcon = (status) => {
-  switch (status) {
-    case "solved":
-      return <CheckCircle className="h-4 w-4 text-green-600" />
-    case "attempted":
-      return <AlertCircle className="h-4 w-4 text-yellow-600" />
-    case "unsolved":
-      return <XCircle className="h-4 w-4 text-gray-400" />
-    default:
-      return <XCircle className="h-4 w-4 text-gray-400" />
-  }
-}
+// const getStatusIcon = (status) => {
+//   const icons = {
+//     solved: <CheckCircle className="h-4 w-4 text-green-600" />,
+//     attempted: <AlertCircle className="h-4 w-4 text-yellow-600" />,
+//     unsolved: <XCircle className="h-4 w-4 text-gray-400" />,
+//   }
+//   return icons[status] || icons.unsolved
+// }
 
-const getCategoryIcon = (category) => {
-  switch (category) {
-    case "Challenge":
-      return <Target className="h-5 w-5" />
-    case "Company":
-      return <Trophy className="h-5 w-5" />
-    case "Topic":
-      return <BookOpen className="h-5 w-5" />
-    default:
-      return <BookOpen className="h-5 w-5" />
+const isSolved = (problem) => {
+  try {
+    if (!problem) return false
+    if (Array.isArray(problem?.userId) && problem.userId.length > 0) {
+      console.log(problem.userId)
+      return true
+    }
+    if (typeof problem?.status === "string") {
+      return problem.status.toLowerCase() === "solved"
+    }
+    return false
+  } catch {
+    return false
   }
 }
 
 const calculateProgress = (problems) => {
-  if (!problems || problems.length === 0) return 0
-  const solvedCount = problems.filter((p) => p.status === "solved").length
+  if (!problems?.length) return 0
+  const solvedCount = problems.filter((p) => {
+    const prob = p?.problem || p
+    return isSolved(prob)
+  }).length
   return Math.round((solvedCount / problems.length) * 100)
+}
+
+// Fixed Stats card component
+const StatsCard = ({ title, value, icon: Icon, borderColor }) => {
+  // Safely extract and convert border color to text color
+  const getIconColor = (borderColor) => {
+    if (!borderColor) return "text-gray-500"
+
+    const parts = borderColor.split(" ")
+    const borderColorClass = parts.find((part) => part.startsWith("border-l-"))
+
+    if (borderColorClass) {
+      return borderColorClass.replace("border-l-", "text-")
+    }
+
+    // Fallback: try to extract color from any border class
+    const colorMatch = borderColor.match(/border-l?-(\w+-\d+)/)
+    return colorMatch ? `text-${colorMatch[1]}` : "text-gray-500"
+  }
+
+  return (
+    <Card className={`border-l-4 ${borderColor}`}>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">{title}</p>
+            <p className="text-3xl font-bold text-foreground">{value}</p>
+          </div>
+          <Icon className={`h-8 w-8 ${getIconColor(borderColor)}`} />
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// Problem item component
+const ProblemItem = ({ problem, playlistId, onSolve, onRemove, isRemoving }) => {
+  const solved = isSolved(problem)
+  const normalizedStatus = solved
+    ? "solved"
+    : typeof problem?.status === "string"
+      ? problem.status.toLowerCase()
+      : "unsolved"
+
+  return (
+    <div
+      className={`flex items-center justify-between p-3 rounded-lg transition-all duration-200 ${
+        isRemoving ? "opacity-50 bg-muted/30" : "bg-muted/50 hover:bg-muted hover:shadow-sm"
+      }`}
+    >
+      <div className="flex items-center gap-3">
+        {/* {getStatusIcon(normalizedStatus)} */}
+        <div className="flex-1">
+          <p
+            className="font-medium text-foreground hover:text-primary transition-colors cursor-pointer"
+            onClick={() => onSolve(problem)}
+            title="Click to solve this problem"
+          >
+            {problem.title}
+          </p>
+          <div className="flex items-center gap-2 mt-1">
+            <Badge variant="outline" className={`text-xs ${getDifficultyColor(problem.difficulty)}`}>
+              {problem.difficulty}
+            </Badge>
+            <div className="flex gap-1">
+              {problem.tags?.slice(0, 2).map((tag) => (
+                <Badge key={tag} variant="secondary" className="text-xs">
+                  {tag}
+                </Badge>
+              ))}
+              {problem.tags?.length > 2 && (
+                <Badge variant="secondary" className="text-xs" title={problem.tags.slice(2).join(", ")}>
+                  +{problem.tags.length - 2}
+                </Badge>
+              )}
+            </div>
+            {normalizedStatus === "solved" && (
+              <Badge variant="default" className="text-xs bg-green-100 text-green-800 border-green-200">
+                ✓ Solved
+              </Badge>
+            )}
+            {normalizedStatus === "attempted" && (
+              <Badge variant="default" className="text-xs bg-yellow-100 text-yellow-800 border-yellow-200">
+                ⚡ Attempted
+              </Badge>
+            )}
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onSolve(problem)}
+          className="hover:bg-primary cursor-pointer transition-colors"
+        >
+          <ExternalLink className="h-3 w-3" />
+          Solve
+        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-destructive hover:text-destructive hover:bg-destructive transition-colors cursor-pointer bg-transparent"
+              disabled={isRemoving}
+            >
+              {isRemoving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Remove Problem</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to remove "{problem.title}" from this playlist? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => onRemove(playlistId, problem.id)}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                disabled={isRemoving}
+              >
+                {isRemoving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Removing...
+                  </>
+                ) : (
+                  "Remove"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    </div>
+  )
 }
 
 export default function PlaylistPage() {
@@ -97,72 +240,81 @@ export default function PlaylistPage() {
     createPlaylist,
     getAllPlaylists,
     getPlaylistDetails,
-    addProblemToPlaylist,
     removeProblemFromPlaylist,
-    deletePlaylist
+    deletePlaylist,
   } = usePlaylistStore()
 
   const [expandedPlaylist, setExpandedPlaylist] = useState(null)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [newPlaylist, setNewPlaylist] = useState({ name: "", description: "" })
   const [deletingPlaylistId, setDeletingPlaylistId] = useState(null)
+  const [isCreating, setIsCreating] = useState(false)
+  const [formErrors, setFormErrors] = useState({})
+  const [removingProblemId, setRemovingProblemId] = useState(null)
 
-  // Memoize the callback to prevent infinite re-renders
-  const memoizedGetAllPlaylists = useCallback(() => {
-    getAllPlaylists()
-  }, [getAllPlaylists])
+  const navigate = useNavigate()
 
-  // Only fetch playlists once on mount
+  const memoizedGetAllPlaylists = useCallback(getAllPlaylists, [getAllPlaylists])
+
   useEffect(() => {
     memoizedGetAllPlaylists()
-  }, [])
+  }, [memoizedGetAllPlaylists])
 
-  // Only fetch details when expanded playlist changes and we don't have current data
   useEffect(() => {
     if (expandedPlaylist && (!currentPlaylist || currentPlaylist.id !== expandedPlaylist)) {
       getPlaylistDetails(expandedPlaylist)
     }
-  }, [expandedPlaylist])
+  }, [expandedPlaylist, currentPlaylist, getPlaylistDetails])
 
-  // Reset expanded playlist if it no longer exists
   useEffect(() => {
-    if (expandedPlaylist && playlist.length > 0 && !playlist.find(p => p.id === expandedPlaylist)) {
+    if (expandedPlaylist && playlist.length > 0 && !playlist.find((p) => p.id === expandedPlaylist)) {
       setExpandedPlaylist(null)
     }
   }, [playlist.length, expandedPlaylist])
 
   const toggleExpand = async (playlistId) => {
-    if (expandedPlaylist === playlistId) {
-      setExpandedPlaylist(null)
-    } else {
-      setExpandedPlaylist(playlistId)
-      getPlaylistDetails(playlistId).catch(console.error)
+    setExpandedPlaylist(expandedPlaylist === playlistId ? null : playlistId)
+  }
+
+  const validateForm = () => {
+    const errors = {}
+    if (!newPlaylist.name?.trim()) {
+      errors.name = "Playlist name is required"
+    } else if (newPlaylist.name.trim().length < 3) {
+      errors.name = "Playlist name must be at least 3 characters long"
     }
+    if (newPlaylist.description?.length > 500) {
+      errors.description = "Description must be less than 500 characters"
+    }
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
   }
 
   const handleCreatePlaylist = async () => {
-    if (!newPlaylist.name.trim()) return
+    if (!validateForm()) return
 
+    setIsCreating(true)
     try {
-      await createPlaylist(newPlaylist)
-      setIsCreateDialogOpen(false)
+      await createPlaylist({
+        name: newPlaylist.name.trim(),
+        description: newPlaylist.description.trim(),
+      })
+
       setNewPlaylist({ name: "", description: "" })
+      setFormErrors({})
+      setIsCreateDialogOpen(false)
     } catch (error) {
       console.error("Failed to create playlist:", error)
+    } finally {
+      setIsCreating(false)
     }
   }
 
   const handleDeletePlaylist = async (playlistId) => {
     try {
       setDeletingPlaylistId(playlistId)
-      
-      // Clear expanded state immediately
-      if (expandedPlaylist === playlistId) {
-        setExpandedPlaylist(null)
-      }
-      
+      if (expandedPlaylist === playlistId) setExpandedPlaylist(null)
       await deletePlaylist(playlistId)
-      
     } catch (error) {
       console.error("Failed to delete playlist:", error)
     } finally {
@@ -171,23 +323,45 @@ export default function PlaylistPage() {
   }
 
   const handleDeleteProblem = async (playlistId, problemId) => {
+    setRemovingProblemId(problemId)
     try {
-      await removeProblemFromPlaylist(playlistId, problemId)
-      if (expandedPlaylist === playlistId) {
-        await getPlaylistDetails(playlistId)
-      }
+      await removeProblemFromPlaylist(playlistId, [problemId])
     } catch (error) {
       console.error("Failed to remove problem:", error)
+    } finally {
+      setRemovingProblemId(null)
     }
   }
 
-  const totalProblems = playlist.reduce((acc, pl) => acc + (pl.problems?.length || 0), 0)
-  const avgProgress =
-    playlist.length > 0
-      ? Math.round(playlist.reduce((acc, pl) => acc + calculateProgress(pl.problems), 0) / playlist.length)
-      : 0
+  const handleSolveProblem = (problem) => {
+    try {
+      const route = `/problem/${problem.id}`
+      navigate(route, {
+        state: { problem, returnTo: "/playlists" },
+      })
+    } catch (error) {
+      console.error("Navigation failed:", error)
+      window.open(`/problems/${problem.id}`, "_blank")
+    }
+  }
 
-  if (isLoading && playlist.length === 0 && !deletingPlaylistId) {
+  const handleDialogClose = (open) => {
+    if (!open && !isCreating) {
+      setIsCreateDialogOpen(false)
+      setNewPlaylist({ name: "", description: "" })
+      setFormErrors({})
+    }
+  }
+
+  const stats = {
+    totalProblems: playlist.reduce((acc, pl) => acc + (pl.problems?.length || 0), 0),
+    avgProgress:
+      playlist.length > 0
+        ? Math.round(playlist.reduce((acc, pl) => acc + calculateProgress(pl.problems), 0) / playlist.length)
+        : 0,
+  }
+
+  if (isLoading && playlist.length === 0) {
     return (
       <div className="min-h-screen bg-background p-6 flex items-center justify-center">
         <div className="flex items-center gap-2">
@@ -208,13 +382,14 @@ export default function PlaylistPage() {
             <p className="text-muted-foreground text-lg">Organize and track your coding practice</p>
           </div>
 
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <Dialog open={isCreateDialogOpen} onOpenChange={handleDialogClose}>
             <DialogTrigger asChild>
-              <Button 
+              <Button
                 className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 disabled={isLoading || deletingPlaylistId}
+                onClick={() => setIsCreateDialogOpen(true)}
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4" />
                 Create New Playlist
               </Button>
             </DialogTrigger>
@@ -224,39 +399,64 @@ export default function PlaylistPage() {
                 <DialogDescription>Create a custom playlist to organize your coding problems</DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Playlist Name</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="name">
+                    Playlist Name <span className="text-red-500">*</span>
+                  </Label>
                   <Input
                     id="name"
                     value={newPlaylist.name}
-                    onChange={(e) => setNewPlaylist({ ...newPlaylist, name: e.target.value })}
+                    onChange={(e) => {
+                      setNewPlaylist({ ...newPlaylist, name: e.target.value })
+                      if (formErrors.name) setFormErrors({ ...formErrors, name: undefined })
+                    }}
                     placeholder="Enter playlist name"
+                    className={formErrors.name ? "border-red-500" : ""}
+                    disabled={isCreating}
                   />
+                  {formErrors.name && <p className="text-sm text-red-500">{formErrors.name}</p>}
                 </div>
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="description">Description</Label>
                   <Textarea
                     id="description"
                     value={newPlaylist.description}
-                    onChange={(e) => setNewPlaylist({ ...newPlaylist, description: e.target.value })}
-                    placeholder="Describe your playlist"
+                    onChange={(e) => {
+                      setNewPlaylist({
+                        ...newPlaylist,
+                        description: e.target.value,
+                      })
+                      if (formErrors.description)
+                        setFormErrors({
+                          ...formErrors,
+                          description: undefined,
+                        })
+                    }}
+                    placeholder="Describe your playlist (optional)"
                     rows={3}
+                    className={formErrors.description ? "border-red-500" : ""}
+                    disabled={isCreating}
+                    maxLength={500}
                   />
+                  {formErrors.description && <p className="text-sm text-red-500">{formErrors.description}</p>}
+                  <p className="text-xs text-muted-foreground">{newPlaylist.description.length}/500 characters</p>
                 </div>
-                <div className="flex justify-end gap-2">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setIsCreateDialogOpen(false)}
-                    disabled={isLoading}
-                  >
+                <div className="flex justify-end gap-2 pt-4">
+                  <Button variant="outline" onClick={() => handleDialogClose(false)} disabled={isCreating}>
                     Cancel
                   </Button>
-                  <Button 
-                    onClick={handleCreatePlaylist} 
-                    disabled={isLoading || !newPlaylist.name.trim()}
-                  >
-                    {isLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                    Create Playlist
+                  <Button onClick={handleCreatePlaylist} disabled={isCreating || !newPlaylist.name.trim()}>
+                    {isCreating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="h-4 w-4" />
+                        Create Playlist
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
@@ -264,55 +464,32 @@ export default function PlaylistPage() {
           </Dialog>
         </div>
 
+        {/* Error Display */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-red-600" />
+              <span className="text-red-800">Error: {error}</span>
+            </div>
+          </div>
+        )}
+
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="border-l-4 border-l-primary">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Playlists</p>
-                  <p className="text-3xl font-bold text-foreground">{playlist.length}</p>
-                </div>
-                <BookOpen className="h-8 w-8 text-primary" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-green-500">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Problems</p>
-                  <p className="text-3xl font-bold text-foreground">{totalProblems}</p>
-                </div>
-                <Target className="h-8 w-8 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-blue-500">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Avg Progress</p>
-                  <p className="text-3xl font-bold text-foreground">{avgProgress}%</p>
-                </div>
-                <Trophy className="h-8 w-8 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-orange-500">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Active Streaks</p>
-                  <p className="text-3xl font-bold text-foreground">7</p>
-                </div>
-                <Clock className="h-8 w-8 text-orange-500" />
-              </div>
-            </CardContent>
-          </Card>
+          <StatsCard title="Total Playlists" value={playlist.length} icon={BookOpen} borderColor="border-l-primary" />
+          <StatsCard
+            title="Total Problems"
+            value={stats.totalProblems}
+            icon={Target}
+            borderColor="border-l-green-500"
+          />
+          <StatsCard
+            title="Avg Progress"
+            value={`${stats.avgProgress}%`}
+            icon={Trophy}
+            borderColor="border-l-blue-500"
+          />
+          <StatsCard title="Active Streaks" value={7} icon={Clock} borderColor="border-l-orange-500" />
         </div>
 
         {/* Playlists Grid */}
@@ -324,25 +501,28 @@ export default function PlaylistPage() {
               isExpanded && currentPlaylist?.id === playlistItem.id
                 ? currentPlaylist.problems
                 : playlistItem.problems || []
-            
             const isBeingDeleted = deletingPlaylistId === playlistItem.id
 
             return (
-              <Card 
-                key={playlistItem.id} 
+              <Card
+                key={playlistItem.id}
                 className={`overflow-hidden hover:shadow-lg transition-all duration-200 ${
-                  isBeingDeleted ? 'opacity-50 pointer-events-none' : ''
+                  isBeingDeleted ? "opacity-50 pointer-events-none" : ""
                 }`}
               >
                 <CardHeader className="pb-4">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3">
-                      <div className="p-2 rounded-lg bg-primary/10 text-primary">{getCategoryIcon("Topic")}</div>
+                      <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                        <BookOpen className="h-5 w-5" />
+                      </div>
                       <div>
                         <CardTitle className="text-xl font-semibold text-foreground">{playlistItem.name}</CardTitle>
-                        <CardDescription className="text-muted-foreground mt-1">
-                          {playlistItem.description}
-                        </CardDescription>
+                        {playlistItem.description && (
+                          <CardDescription className="text-muted-foreground mt-1">
+                            {playlistItem.description}
+                          </CardDescription>
+                        )}
                         <div className="flex items-center gap-4 mt-3">
                           <Badge variant="secondary" className="text-xs">
                             Playlist
@@ -350,20 +530,18 @@ export default function PlaylistPage() {
                           <span className="text-sm text-muted-foreground">
                             {playlistItem.problems?.length || 0} problems
                           </span>
-                          <span className="text-sm text-muted-foreground">
-                            Created {new Date(playlistItem.createdAt).toLocaleDateString()}
-                          </span>
+                          {playlistItem.createdAt && (
+                            <span className="text-sm text-muted-foreground">
+                              Created {new Date(playlistItem.createdAt).toLocaleDateString()}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            disabled={isBeingDeleted || isLoading}
-                          >
+                          <Button variant="ghost" size="sm" disabled={isBeingDeleted || isLoading}>
                             {isBeingDeleted ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
@@ -372,18 +550,12 @@ export default function PlaylistPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem 
-                            onClick={(e) => {
-                              e.preventDefault()
-                              e.stopPropagation()
-                              if (!isBeingDeleted) {
-                                handleDeletePlaylist(playlistItem.id)
-                              }
-                            }}
+                          <DropdownMenuItem
+                            onClick={() => !isBeingDeleted && handleDeletePlaylist(playlistItem.id)}
                             disabled={isBeingDeleted}
-                            className="text-destructive focus:text-destructive"
+                            className="text-destructive focus:text-destructive cursor-pointer"
                           >
-                            <Trash2 className="h-4 w-4 mr-2" />
+                            <Trash2 className="h-4 w-4 text-destructive" />
                             Delete Playlist
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -392,7 +564,6 @@ export default function PlaylistPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => toggleExpand(playlistItem.id)}
-                        className="shrink-0"
                         disabled={isBeingDeleted || isLoading}
                       >
                         {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
@@ -428,71 +599,14 @@ export default function PlaylistPage() {
                               displayProblems.map((problemItem) => {
                                 const problem = problemItem.problem || problemItem
                                 return (
-                                  <div
+                                  <ProblemItem
                                     key={problem.id}
-                                    className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-                                  >
-                                    <div className="flex items-center gap-3">
-                                      {getStatusIcon("unsolved")}
-                                      <div>
-                                        <p className="font-medium text-foreground">{problem.title}</p>
-                                        <div className="flex items-center gap-2 mt-1">
-                                          <Badge
-                                            variant="outline"
-                                            className={`text-xs ${getDifficultyColor(problem.difficulty)}`}
-                                          >
-                                            {problem.difficulty}
-                                          </Badge>
-                                          <div className="flex gap-1">
-                                            {problem.tags?.slice(0, 2).map((tag) => (
-                                              <Badge key={tag} variant="secondary" className="text-xs">
-                                                {tag}
-                                              </Badge>
-                                            ))}
-                                            {problem.tags?.length > 2 && (
-                                              <Badge variant="secondary" className="text-xs">
-                                                +{problem.tags.length - 2}
-                                              </Badge>
-                                            )}
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                      <Button variant="outline" size="sm">
-                                        Solve
-                                      </Button>
-                                      <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                          <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="text-destructive hover:text-destructive"
-                                          >
-                                            <Trash2 className="h-4 w-4" />
-                                          </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                          <AlertDialogHeader>
-                                            <AlertDialogTitle>Remove Problem</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                              Are you sure you want to remove "{problem.title}" from this playlist? This
-                                              action cannot be undone.
-                                            </AlertDialogDescription>
-                                          </AlertDialogHeader>
-                                          <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction
-                                              onClick={() => handleDeleteProblem(playlistItem.id, problem.id)}
-                                              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                            >
-                                              Remove
-                                            </AlertDialogAction>
-                                          </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                      </AlertDialog>
-                                    </div>
-                                  </div>
+                                    problem={problem}
+                                    playlistId={playlistItem.id}
+                                    onSolve={handleSolveProblem}
+                                    onRemove={handleDeleteProblem}
+                                    isRemoving={removingProblemId === problem.id}
+                                  />
                                 )
                               })
                             )}
