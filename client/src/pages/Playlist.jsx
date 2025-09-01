@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -41,8 +39,8 @@ import {
   AlertCircle,
   Trash2,
   MoreVertical,
-  Loader2,
   ExternalLink,
+  Loader,
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { usePlaylistStore } from "@/store/usePlaylistStore"
@@ -197,7 +195,7 @@ const ProblemItem = ({ problem, playlistId, onSolve, onRemove, isRemoving }) => 
               className="text-destructive hover:text-destructive hover:bg-destructive transition-colors cursor-pointer bg-transparent"
               disabled={isRemoving}
             >
-              {isRemoving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+              {isRemoving ? <Loader className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
@@ -216,7 +214,7 @@ const ProblemItem = ({ problem, playlistId, onSolve, onRemove, isRemoving }) => 
               >
                 {isRemoving ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    <Loader className="h-4 w-4 animate-spin mr-2" />
                     Removing...
                   </>
                 ) : (
@@ -365,7 +363,7 @@ export default function PlaylistPage() {
     return (
       <div className="min-h-screen bg-background p-6 flex items-center justify-center">
         <div className="flex items-center gap-2">
-          <Loader2 className="h-6 w-6 animate-spin" />
+        <Loader className="size-10 animate-spin" />
           <span>Loading playlists...</span>
         </div>
       </div>
@@ -448,7 +446,7 @@ export default function PlaylistPage() {
                   <Button onClick={handleCreatePlaylist} disabled={isCreating || !newPlaylist.name.trim()}>
                     {isCreating ? (
                       <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader className="h-4 w-4 animate-spin" />
                         Creating...
                       </>
                     ) : (
@@ -476,20 +474,20 @@ export default function PlaylistPage() {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <StatsCard title="Total Playlists" value={playlist.length} icon={BookOpen} borderColor="border-l-primary" />
+          <StatsCard title="Total Playlists" value={playlist.length} icon={BookOpen} borderColor="border-l-primary border-t-primary border-3" />
           <StatsCard
             title="Total Problems"
             value={stats.totalProblems}
             icon={Target}
-            borderColor="border-l-green-500"
+            borderColor="border-l-green-500 border-t-green-500 border-3"
           />
           <StatsCard
             title="Avg Progress"
             value={`${stats.avgProgress}%`}
             icon={Trophy}
-            borderColor="border-l-blue-500"
+            borderColor="border-l-blue-500 border-t-blue-500 border-3"
           />
-          <StatsCard title="Active Streaks" value={7} icon={Clock} borderColor="border-l-orange-500" />
+          <StatsCard title="Active Streaks" value={7} icon={Clock} borderColor="border-l-orange-500 border-t-orange-500 border-3" />
         </div>
 
         {/* Playlists Grid */}
@@ -543,7 +541,7 @@ export default function PlaylistPage() {
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm" disabled={isBeingDeleted || isLoading}>
                             {isBeingDeleted ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
+                              <Loader className="h-4 w-4 animate-spin" />
                             ) : (
                               <MoreVertical className="h-4 w-4" />
                             )}
@@ -587,7 +585,7 @@ export default function PlaylistPage() {
                         <h4 className="font-medium text-foreground mb-3">Problems in this playlist:</h4>
                         {isLoading && currentPlaylist?.id !== playlistItem.id ? (
                           <div className="flex items-center justify-center py-4">
-                            <Loader2 className="h-6 w-6 animate-spin" />
+                            <Loader className="h-6 w-6 animate-spin" />
                           </div>
                         ) : (
                           <div className="space-y-2">

@@ -7,8 +7,8 @@ import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/SignUpPage";
 import Dashboard from "./pages/Dashboard";
 import Explore from "./pages/Explore";
-import Interview from "./pages/Interview";
-import Analytics from "./pages/Analytics";
+import Interview from "./pages/Profile";
+import Analytics from "./pages/Playlist";
 import AddProblem from "./pages/AddProblem";
 import ProblemPage from "./pages/ProblemPage";
 
@@ -17,6 +17,8 @@ import { Loader } from "lucide-react";
 import Navbar from "./layout/Navbar";
 import AdminRoute from "./components/AdminRoute";
 import { ThemeProvider } from "./components/Theme-provider";
+import PlaylistPage from "./pages/Playlist";
+import ProfilePage from "./pages/Profile";
 
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -76,18 +78,13 @@ const App = () => {
           />
 
           <Route
-            path="explore"
-            element={authUser ? <Explore /> : <Navigate to="/login" />}
+            path="profile"
+            element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
           />
 
           <Route
-            path="interview"
-            element={authUser ? <Interview /> : <Navigate to="/login" />}
-          />
-
-          <Route
-            path="analytics"
-            element={authUser ? <Analytics /> : <Navigate to="/login" />}
+            path="playlist"
+            element={authUser ? <PlaylistPage /> : <Navigate to="/login" />}
           />
 
           <Route

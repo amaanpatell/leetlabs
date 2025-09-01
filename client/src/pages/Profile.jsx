@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { User, Trophy, Target, Code, CheckCircle, Clock, Star, TrendingUp, Award, Flame, BookOpen } from "lucide-react"
+import { User, Trophy, Target, Code, CheckCircle, Clock, Star, TrendingUp, Award, Flame, BookOpen, Loader } from "lucide-react"
 import { useAuthStore } from "@/store/useAuthStore"
 import { useSubmissionStore } from "@/store/useSubmissionStore"
 import { useState, useEffect } from "react"
@@ -222,10 +222,7 @@ const ProfilePage = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background p-6 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading your profile...</p>
-        </div>
+          <Loader className="size-10 animate-spin" />
       </div>
     )
   }

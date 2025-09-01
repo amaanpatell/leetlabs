@@ -1,46 +1,28 @@
-import React, { useState } from "react";
-import { useForm, useFieldArray, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import {
-  Plus,
-  Trash2,
-  Code2,
-  FileText,
-  Lightbulb,
-  BookOpen,
-  CheckCircle2,
-  Download,
-  ChevronRight,
-  ChevronLeft,
-  Info,
-  Tags,
-  TestTube,
-  Settings,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useNavigate } from "react-router-dom";
-import { Editor } from "@monaco-editor/react";
-import toast from "react-hot-toast";
-import { axiosInstance } from "@/utils/axios";
+"use client"
+
+import React, { useState } from "react"
+import { useForm, useFieldArray, Controller } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
+import { Plus, Trash2, Code2, CheckCircle2, Download, ChevronRight, ChevronLeft, Info, Tags, TestTube, Settings } from 'lucide-react'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useNavigate } from "react-router-dom"
+import { Editor } from "@monaco-editor/react"
+import toast from "react-hot-toast"
+import { axiosInstance } from "@/utils/axios"
 
 const problemSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   difficulty: z.enum(["EASY", "MEDIUM", "HARD"]),
   tags: z.array(z.string()).min(1, "At least one tag is required"),
+  company: z.array(z.string()).optional(), // NEW
   constraints: z.string().min(1, "Constraints are required"),
   hints: z.string().optional(),
   editorial: z.string().optional(),
@@ -49,7 +31,7 @@ const problemSchema = z.object({
       z.object({
         input: z.string().min(1, "Input is required"),
         output: z.string().min(1, "Output is required"),
-      })
+      }),
     )
     .min(1, "At least one test case is required"),
   examples: z.object({
@@ -79,7 +61,7 @@ const problemSchema = z.object({
     PYTHON: z.string().min(1, "Python solution is required"),
     JAVA: z.string().min(1, "Java solution is required"),
   }),
-});
+})
 
 const sampleDpData = {
   title: "Climbing Stairs",
@@ -88,9 +70,9 @@ const sampleDpData = {
     "You are climbing a staircase. It takes n steps to reach the top. Each time you can either climb 1 or 2 steps. In how many distinct ways can you climb to the top?",
   difficulty: "EASY",
   tags: ["Dynamic Programming", "Math", "Memoization"],
+  company: ["Google"],
   constraints: "1 <= n <= 45",
-  hints:
-    "To reach the nth step, you can either come from the (n-1)th step or the (n-2)th step.",
+  hints: "To reach the nth step, you can either come from the (n-1)th step or the (n-2)th step.",
   editorial:
     "This is a classic dynamic programming problem. The number of ways to reach the nth step is the sum of the number of ways to reach the (n-1)th step and the (n-2)th step, forming a Fibonacci-like sequence.",
   testCases: [
@@ -111,8 +93,7 @@ const sampleDpData = {
     JAVASCRIPT: {
       input: "n = 2",
       output: "2",
-      explanation:
-        "There are two ways to climb to the top:\n1. 1 step + 1 step\n2. 2 steps",
+      explanation: "There are two ways to climb to the top:\n1. 1 step + 1 step\n2. 2 steps",
     },
     PYTHON: {
       input: "n = 3",
@@ -325,7 +306,7 @@ class Main {
   }
 }`,
   },
-};
+}
 
 // Sample problem data for another type of question
 const sampleStringProblem = {
@@ -334,10 +315,9 @@ const sampleStringProblem = {
     "A phrase is a palindrome if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward. Alphanumeric characters include letters and numbers. Given a string s, return true if it is a palindrome, or false otherwise.",
   difficulty: "EASY",
   tags: ["String", "Two Pointers"],
-  constraints:
-    "1 <= s.length <= 2 * 10^5\ns consists only of printable ASCII characters.",
-  hints:
-    "Consider using two pointers, one from the start and one from the end, moving towards the center.",
+  company: ["Amazon"],
+  constraints: "1 <= s.length <= 2 * 10^5\ns consists only of printable ASCII characters.",
+  hints: "Consider using two pointers, one from the start and one from the end, moving towards the center.",
   editorial:
     "We can use two pointers approach to check if the string is a palindrome. One pointer starts from the beginning and the other from the end, moving towards each other.",
   testCases: [
@@ -526,7 +506,7 @@ public class Main {
 }
 `,
   },
-};
+}
 
 const STEPS = [
   {
@@ -559,13 +539,15 @@ const STEPS = [
     description: "Constraints, hints, editorial",
     icon: Settings,
   },
-];
+]
+
+const QUICK_COMPANIES = ["Amazon", "Google", "Microsoft"] 
 
 const CreateProblemForm = () => {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [sampleType, setSampleType] = useState("DP");
-  const [isLoading, setIsLoading] = useState(false);
-  const navigation = useNavigate();
+  const [currentStep, setCurrentStep] = useState(1)
+  const [sampleType, setSampleType] = useState("DP")
+  const [isLoading, setIsLoading] = useState(false)
+  const navigation = useNavigate()
 
   const {
     register,
@@ -575,12 +557,14 @@ const CreateProblemForm = () => {
     watch,
     setValue,
     trigger,
+    getValues, // add getValues to support quick-pick logic
     formState: { errors },
   } = useForm({
     resolver: zodResolver(problemSchema),
     defaultValues: {
       testCases: [{ input: "", output: "" }],
       tags: [""],
+      company: [],
       difficulty: "EASY",
       examples: {
         JAVASCRIPT: { input: "", output: "", explanation: "" },
@@ -598,7 +582,7 @@ const CreateProblemForm = () => {
         JAVA: "// Add your reference solution here",
       },
     },
-  });
+  })
 
   const {
     fields: testCaseFields,
@@ -608,7 +592,7 @@ const CreateProblemForm = () => {
   } = useFieldArray({
     control,
     name: "testCases",
-  });
+  })
 
   const {
     fields: tagFields,
@@ -618,93 +602,119 @@ const CreateProblemForm = () => {
   } = useFieldArray({
     control,
     name: "tags",
-  });
+  })
+
+  const {
+    fields: companyFields,
+    append: appendCompany,
+    remove: removeCompany,
+    replace: replaceCompanies,
+  } = useFieldArray({
+    control,
+    name: "company",
+  })
 
   const validateCurrentStep = async () => {
-    let fieldsToValidate = [];
+    let fieldsToValidate = []
 
     switch (currentStep) {
       case 1:
-        fieldsToValidate = ["title", "description", "difficulty"];
-        break;
+        fieldsToValidate = ["title", "description", "difficulty"]
+        break
       case 2:
-        fieldsToValidate = ["tags"];
-        break;
+        fieldsToValidate = ["tags", "company"]
+        break
       case 3:
-        fieldsToValidate = ["testCases"];
-        break;
+        fieldsToValidate = ["testCases"]
+        break
       case 4:
-        fieldsToValidate = ["codeSnippets", "referenceSolutions", "examples"];
-        break;
+        fieldsToValidate = ["codeSnippets", "referenceSolutions", "examples"]
+        break
       case 5:
-        fieldsToValidate = ["constraints"];
-        break;
+        fieldsToValidate = ["constraints"]
+        break
       default:
-        return true;
+        return true
     }
 
-    return await trigger(fieldsToValidate);
-  };
+    return await trigger(fieldsToValidate)
+  }
 
   const nextStep = async () => {
-    const isValid = await validateCurrentStep();
+    const isValid = await validateCurrentStep()
     if (isValid && currentStep < STEPS.length) {
-      setCurrentStep(currentStep + 1);
+      setCurrentStep(currentStep + 1)
     }
-  };
+  }
 
   const prevStep = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+      setCurrentStep(currentStep - 1)
     }
-  };
+  }
 
   const onSubmit = async (values) => {
     // Prevent accidental submission - only submit when explicitly clicked
     if (!isLoading) {
       try {
-        setIsLoading(true);
-        console.log("Form submitted:", values);
-        const res = await axiosInstance.post(
-          "/problems/create-problem",
-          values
-        );
-        toast.success(res.data.message || "Problem Created successfully⚡");
-        navigation("/problem"); // Redirect to problems page after successful creation
+        setIsLoading(true)
+        // Normalize companies: trim and remove empties and duplicates (case-insensitive)
+        const companiesArray = (values.company || [])
+          .map((c) => (c || "").trim())
+          .filter((c) => c.length > 0)
+
+        const dedupedCompanies = Array.from(
+          new Map(companiesArray.map((c) => [c.toLowerCase(), c])).values(),
+        )
+
+        // Build payload for backend: company must be an array
+        const payload  = {
+          ...values,
+          company: dedupedCompanies, // Prisma expects String[] or CreatecompanyInput
+        }
+
+        // Remove noisy debug logs
+        // console.log("Form submitted:", values)
+
+        const res = await axiosInstance.post("/problems/create-problem", payload)
+        toast.success(res.data.message || "Problem Created successfully⚡")
+        navigation("/problem")
       } catch (error) {
-        console.error("Error creating problem:", error);
-        toast.error(error.response?.data?.message || "Error creating problem");
+        console.error("Error creating problem:", error)
+        toast.error(error.response?.data?.message || "Error creating problem")
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     }
-  };
+  }
 
   const loadSampleData = () => {
-    const sampleData = sampleType === "DP" ? sampleDpData : sampleStringProblem;
-    replaceTags(sampleData.tags);
-    replaceTestCases(sampleData.testCases);
-    reset(sampleData);
-  };
+    const sampleData = sampleType === "DP" ? sampleDpData : sampleStringProblem
+    replaceTags(sampleData.tags)
+    replaceTestCases(sampleData.testCases)
+    reset(sampleData)
+    // populate companies from `company` if provided, else keep one blank input
+    replaceCompanies(sampleData.company ? sampleData.company : [""])
+  }
 
   const CodeEditor = ({ value, onChange, language }) => (
-  <Editor
-    height="300px"
-    language={language.toLowerCase()}
-    theme="vs-dark"
-    value={value}
-    onChange={(value) => onChange(value || "")}
-    options={{
-      minimap: { enabled: false },
-      fontSize: 14,
-      lineNumbers: "on",
-      roundedSelection: false,
-      scrollBeyondLastLine: false,
-      readOnly: false,
-      automaticLayout: true,
-    }}
-  />
-);
+    <Editor
+      height="300px"
+      language={language.toLowerCase()}
+      theme="vs-dark"
+      value={value}
+      onChange={(value) => onChange(value || "")}
+      options={{
+        minimap: { enabled: false },
+        fontSize: 14,
+        lineNumbers: "on",
+        roundedSelection: false,
+        scrollBeyondLastLine: false,
+        readOnly: false,
+        automaticLayout: true,
+      }}
+    />
+  )
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -721,11 +731,7 @@ const CreateProblemForm = () => {
                 placeholder="Enter a descriptive problem title"
                 className="text-base"
               />
-              {errors.title && (
-                <p className="text-sm text-destructive">
-                  {errors.title.message}
-                </p>
-              )}
+              {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
             </div>
 
             <div className="space-y-2">
@@ -738,11 +744,7 @@ const CreateProblemForm = () => {
                 placeholder="Describe the problem in detail..."
                 className="min-h-32 text-base resize-y"
               />
-              {errors.description && (
-                <p className="text-sm text-destructive">
-                  {errors.description.message}
-                </p>
-              )}
+              {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
             </div>
 
             <div className="space-y-2">
@@ -759,14 +761,10 @@ const CreateProblemForm = () => {
                   <SelectItem value="HARD">Hard</SelectItem>
                 </SelectContent>
               </Select>
-              {errors.difficulty && (
-                <p className="text-sm text-destructive">
-                  {errors.difficulty.message}
-                </p>
-              )}
+              {errors.difficulty && <p className="text-sm text-destructive">{errors.difficulty.message}</p>}
             </div>
           </div>
-        );
+        )
 
       case 2:
         return (
@@ -774,9 +772,7 @@ const CreateProblemForm = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Problem Tags</h3>
-                <p className="text-sm text-muted-foreground">
-                  Add relevant tags to categorize your problem
-                </p>
+                <p className="text-sm text-muted-foreground">Add relevant tags to categorize your problem</p>
               </div>
               <Button type="button" size="sm" onClick={() => appendTag("")}>
                 <Plus className="w-4 h-4 mr-1" /> Add Tag
@@ -803,11 +799,68 @@ const CreateProblemForm = () => {
                 </div>
               ))}
             </div>
-            {errors.tags && (
-              <p className="text-sm text-destructive">{errors.tags.message}</p>
-            )}
+            {errors.tags && <p className="text-sm text-destructive">{errors.tags.message}</p>}
+
+            <div className="pt-2 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-md font-semibold">Companies</h4>
+                  <p className="text-sm text-muted-foreground">Add one or more companies; use quick picks below</p>
+                </div>
+                <Button type="button" size="sm" onClick={() => appendCompany("")}>
+                  <Plus className="w-4 h-4 mr-1" /> Add Company
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {companyFields.map((field, index) => (
+                  <div key={field.id} className="flex gap-2 items-center">
+                    <Input
+                      {...register(`company.${index}`)}
+                      placeholder="e.g., Amazon, Google, Microsoft"
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeCompany(index)}
+                      disabled={companyFields.length === 1}
+                    >
+                      <Trash2 className="w-4 h-4 text-destructive" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Quick-pick buttons: append/fill without duplicates */}
+              <div className="flex flex-wrap gap-2">
+                {QUICK_COMPANIES.map((c) => (
+                  <Button
+                    key={c}
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      const curr = (getValues("company") || [])
+                      const exists = curr.some((v) => (v || "").trim().toLowerCase() === c.toLowerCase())
+                      if (exists) return
+                      const emptyIndex = curr.findIndex((v) => !v || v.trim() === "")
+                      if (emptyIndex !== -1) {
+                        setValue(`company.${emptyIndex}`, c, { shouldDirty: true, shouldTouch: true })
+                      } else {
+                        appendCompany(c)
+                      }
+                      trigger("company")
+                    }}
+                  >
+                    {c}
+                  </Button>
+                ))}
+              </div>
+            </div>
           </div>
-        );
+        )
 
       case 3:
         return (
@@ -815,15 +868,9 @@ const CreateProblemForm = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-semibold">Test Cases</h3>
-                <p className="text-sm text-muted-foreground">
-                  Define input/output pairs to validate solutions
-                </p>
+                <p className="text-sm text-muted-foreground">Define input/output pairs to validate solutions</p>
               </div>
-              <Button
-                type="button"
-                size="sm"
-                onClick={() => appendTestCase({ input: "", output: "" })}
-              >
+              <Button type="button" size="sm" onClick={() => appendTestCase({ input: "", output: "" })}>
                 <Plus className="w-4 h-4 mr-1" /> Add Test Case
               </Button>
             </div>
@@ -833,9 +880,7 @@ const CreateProblemForm = () => {
                 <Card key={field.id} className="border-dashed">
                   <CardHeader className="pb-3">
                     <div className="flex justify-between items-center">
-                      <h4 className="text-md font-semibold">
-                        Test Case #{index + 1}
-                      </h4>
+                      <h4 className="text-md font-semibold">Test Case #{index + 1}</h4>
                       <Button
                         type="button"
                         variant="ghost"
@@ -857,9 +902,7 @@ const CreateProblemForm = () => {
                           className="min-h-20 resize-y"
                         />
                         {errors.testCases?.[index]?.input && (
-                          <p className="text-sm text-destructive">
-                            {errors.testCases[index].input.message}
-                          </p>
+                          <p className="text-sm text-destructive">{errors.testCases[index].input.message}</p>
                         )}
                       </div>
                       <div className="space-y-2">
@@ -870,9 +913,7 @@ const CreateProblemForm = () => {
                           className="min-h-20 resize-y"
                         />
                         {errors.testCases?.[index]?.output && (
-                          <p className="text-sm text-destructive">
-                            {errors.testCases[index].output.message}
-                          </p>
+                          <p className="text-sm text-destructive">{errors.testCases[index].output.message}</p>
                         )}
                       </div>
                     </div>
@@ -881,18 +922,14 @@ const CreateProblemForm = () => {
               ))}
             </div>
           </div>
-        );
+        )
 
       case 4:
         return (
           <div className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold">
-                Code Templates & Solutions
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Provide starter code and reference solutions
-              </p>
+              <h3 className="text-lg font-semibold">Code Templates & Solutions</h3>
+              <p className="text-sm text-muted-foreground">Provide starter code and reference solutions</p>
             </div>
 
             <Tabs defaultValue="JAVASCRIPT" className="w-full">
@@ -903,11 +940,7 @@ const CreateProblemForm = () => {
               </TabsList>
 
               {["JAVASCRIPT", "PYTHON", "JAVA"].map((language) => (
-                <TabsContent
-                  key={language}
-                  value={language}
-                  className="space-y-6"
-                >
+                <TabsContent key={language} value={language} className="space-y-6">
                   {/* Starter Code */}
                   <Card>
                     <CardHeader>
@@ -921,11 +954,7 @@ const CreateProblemForm = () => {
                         name={`codeSnippets.${language}`}
                         control={control}
                         render={({ field }) => (
-                          <CodeEditor
-                            value={field.value}
-                            onChange={field.onChange}
-                            language={language}
-                          />
+                          <CodeEditor value={field.value} onChange={field.onChange} language={language} />
                         )}
                       />
                     </CardContent>
@@ -944,11 +973,7 @@ const CreateProblemForm = () => {
                         name={`referenceSolutions.${language}`}
                         control={control}
                         render={({ field }) => (
-                          <CodeEditor
-                            value={field.value}
-                            onChange={field.onChange}
-                            language={language}
-                          />
+                          <CodeEditor value={field.value} onChange={field.onChange} language={language} />
                         )}
                       />
                     </CardContent>
@@ -978,9 +1003,7 @@ const CreateProblemForm = () => {
                           />
                         </div>
                         <div className="md:col-span-2 space-y-2">
-                          <Label className="font-medium">
-                            Explanation (Optional)
-                          </Label>
+                          <Label className="font-medium">Explanation (Optional)</Label>
                           <Textarea
                             {...register(`examples.${language}.explanation`)}
                             placeholder="Explain the example"
@@ -994,16 +1017,14 @@ const CreateProblemForm = () => {
               ))}
             </Tabs>
           </div>
-        );
+        )
 
       case 5:
         return (
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold">Additional Information</h3>
-              <p className="text-sm text-muted-foreground">
-                Constraints, hints, and editorial content
-              </p>
+              <p className="text-sm text-muted-foreground">Constraints, hints, and editorial content</p>
             </div>
 
             <div className="space-y-6">
@@ -1014,11 +1035,7 @@ const CreateProblemForm = () => {
                   placeholder="e.g., 1 <= n <= 1000, -10^9 <= nums[i] <= 10^9"
                   className="min-h-20 resize-y"
                 />
-                {errors.constraints && (
-                  <p className="text-sm text-destructive">
-                    {errors.constraints.message}
-                  </p>
-                )}
+                {errors.constraints && <p className="text-sm text-destructive">{errors.constraints.message}</p>}
               </div>
 
               <div className="space-y-2">
@@ -1040,16 +1057,16 @@ const CreateProblemForm = () => {
               </div>
             </div>
           </div>
-        );
+        )
 
       default:
-        return null;
+        return null
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-8 px-4 max-w-7xl">
+      <div className="container mx-auto py-8 px-4">
         {/* Step Breadcrumb */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
@@ -1083,18 +1100,16 @@ const CreateProblemForm = () => {
           {/* Progress Steps */}
           <div className="flex items-center justify-between">
             {STEPS.map((step, index) => {
-              const Icon = step.icon;
-              const isActive = currentStep === step.id;
-              const isCompleted = currentStep > step.id;
-              const isClickable = currentStep >= step.id;
+              const Icon = step.icon
+              const isActive = currentStep === step.id
+              const isCompleted = currentStep > step.id
+              const isClickable = currentStep >= step.id
 
               return (
                 <React.Fragment key={step.id}>
                   <div
                     className={`flex flex-col items-center cursor-pointer transition-all ${
-                      isClickable
-                        ? "hover:scale-105"
-                        : "cursor-not-allowed opacity-50"
+                      isClickable ? "hover:scale-105" : "cursor-not-allowed opacity-50"
                     }`}
                     onClick={() => isClickable && setCurrentStep(step.id)}
                   >
@@ -1103,38 +1118,28 @@ const CreateProblemForm = () => {
                         isActive
                           ? "bg-primary border-primary text-primary-foreground"
                           : isCompleted
-                          ? "bg-primary border-primary text-primary-foreground"
-                          : "bg-background border-muted-foreground text-muted-foreground"
+                            ? "bg-primary border-primary text-primary-foreground"
+                            : "bg-background border-muted-foreground text-muted-foreground"
                       }`}
                     >
-                      {isCompleted ? (
-                        <CheckCircle2 className="w-6 h-6" />
-                      ) : (
-                        <Icon className="w-6 h-6" />
-                      )}
+                      {isCompleted ? <CheckCircle2 className="w-6 h-6" /> : <Icon className="w-6 h-6" />}
                     </div>
                     <div className="text-center">
                       <div
                         className={`text-sm font-medium ${
-                          isActive
-                            ? "text-primary"
-                            : isCompleted
-                            ? "text-primary"
-                            : "text-muted-foreground"
+                          isActive ? "text-primary" : isCompleted ? "text-primary" : "text-muted-foreground"
                         }`}
                       >
                         {step.title}
                       </div>
-                      <div className="text-xs text-muted-foreground hidden sm:block">
-                        {step.description}
-                      </div>
+                      <div className="text-xs text-muted-foreground hidden sm:block">{step.description}</div>
                     </div>
                   </div>
                   {index < STEPS.length - 1 && (
                     <ChevronRight className="w-5 h-5 text-muted-foreground hidden md:block" />
                   )}
                 </React.Fragment>
-              );
+              )
             })}
           </div>
         </div>
@@ -1149,8 +1154,7 @@ const CreateProblemForm = () => {
               {STEPS[currentStep - 1].title}
             </CardTitle>
             <p className="text-muted-foreground">
-              Step {currentStep} of {STEPS.length}:{" "}
-              {STEPS[currentStep - 1].description}
+              Step {currentStep} of {STEPS.length}: {STEPS[currentStep - 1].description}
             </p>
           </CardHeader>
           <CardContent className="p-8">
@@ -1164,7 +1168,7 @@ const CreateProblemForm = () => {
                   variant="outline"
                   onClick={prevStep}
                   disabled={currentStep === 1}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 bg-transparent"
                 >
                   <ChevronLeft className="w-4 h-4" />
                   Previous
@@ -1194,11 +1198,7 @@ const CreateProblemForm = () => {
                     )}
                   </Button>
                 ) : (
-                  <Button
-                    type="button"
-                    onClick={nextStep}
-                    className="flex items-center gap-2"
-                  >
+                  <Button type="button" onClick={nextStep} className="flex items-center gap-2">
                     Next
                     <ChevronRight className="w-4 h-4" />
                   </Button>
@@ -1209,7 +1209,7 @@ const CreateProblemForm = () => {
         </Card>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CreateProblemForm;
+export default CreateProblemForm

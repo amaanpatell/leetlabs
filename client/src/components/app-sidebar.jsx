@@ -1,5 +1,5 @@
 import * as React from "react";
-import { IconInnerShadowTop } from "@tabler/icons-react";
+import { IconInnerShadowTop, IconPlaylist, IconPlaylistAdd } from "@tabler/icons-react";
 
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -13,12 +13,10 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import {
-  BarChartIcon,
   Code,
   FilePen,
   LayoutDashboardIcon,
   ListIcon,
-  SearchIcon,
   UsersIcon,
 } from "lucide-react";
 import { NavDocuments } from "./nav-documents";
@@ -43,14 +41,14 @@ const data = {
       icon: ListIcon,
     },
     {
-      title: "Interview",
-      url: "/interview",
+      title: "Profile",
+      url: "/profile",
       icon: UsersIcon,
     },
     {
       title: "Playlist",
-      url: "/analytics",
-      icon: BarChartIcon,
+      url: "/playlist",
+      icon: IconPlaylistAdd,
     },
   ],
   documents: [
