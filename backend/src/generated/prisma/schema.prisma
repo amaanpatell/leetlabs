@@ -54,6 +54,7 @@ model Problem {
   description        String
   difficulty         Difficulty
   tags               String[]
+  company            String[]
   userId             String
   examples           Json
   constraints        String
