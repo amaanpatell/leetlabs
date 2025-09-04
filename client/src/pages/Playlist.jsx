@@ -56,15 +56,6 @@ const getDifficultyColor = (difficulty) => {
   return colors[difficulty?.toUpperCase()] || "text-gray-600 bg-gray-50 border-gray-200"
 }
 
-// const getStatusIcon = (status) => {
-//   const icons = {
-//     solved: <CheckCircle className="h-4 w-4 text-green-600" />,
-//     attempted: <AlertCircle className="h-4 w-4 text-yellow-600" />,
-//     unsolved: <XCircle className="h-4 w-4 text-gray-400" />,
-//   }
-//   return icons[status] || icons.unsolved
-// }
-
 const isSolved = (problem) => {
   try {
     if (!problem) return false

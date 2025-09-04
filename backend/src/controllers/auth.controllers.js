@@ -25,6 +25,12 @@ export const registerUser = asyncHandler(async (req, res) => {
       password: hashedPassword,
       name,
       role: UserRole.USER,
+      playlists: {
+          create: {
+            name: "Favourite",
+            description: "Your default Favourite playlist"
+          }
+        }
     },
   });
 
