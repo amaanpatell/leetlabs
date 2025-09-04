@@ -44,7 +44,10 @@ export function NavUser({ user }) {
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
                 <AvatarImage src={authUser?.avatar} alt={authUser?.name} />
-                <AvatarFallback className="rounded-lg">Lab</AvatarFallback>
+                <AvatarFallback className="rounded-lg"> {authUser.name
+                    .split(" ")
+                    .map((n) => n[0])
+                    .join("")}</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{authUser?.name}</span>
