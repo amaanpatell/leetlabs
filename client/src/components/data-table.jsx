@@ -1,5 +1,3 @@
-"use client"
-
 import * as React from "react"
 import {
   IconDotsVertical,
@@ -36,6 +34,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useAuthStore } from "@/store/useAuthStore"
+import { useActions } from "@/store/useAction" // Add this import
 import {
   Dialog,
   DialogClose,
@@ -84,9 +83,10 @@ const DifficultyCell = React.memo(({ difficulty }) => {
 DifficultyCell.displayName = "DifficultyCell"
 
 // Memoized Actions Dropdown
-const ActionsDropdown = React.memo(({ problem }) => {
+const ActionsDropdown = React.memo(({ problem, onProblemDeleted }) => {
   const { authUser } = useAuthStore()
   const { playlist, isLoading, getAllPlaylists, addProblemToPlaylist } = usePlaylistStore()
+  const { onDeleteProblem, isDeletingProblem } = useActions() // Add this line
 
   const [isPlaylistSelectionOpen, setIsPlaylistSelectionOpen] = React.useState(false)
   const [selectedPlaylist, setSelectedPlaylist] = React.useState("")
@@ -125,6 +125,20 @@ const ActionsDropdown = React.memo(({ problem }) => {
     }
   }, [selectedPlaylist, problem?.id, addProblemToPlaylist])
 
+  const handleDeleteProblem = React.useCallback(async () => {
+    if (!problem?.id) return
+    try {
+      await onDeleteProblem(problem.id)
+      setMenuOpen(false) // close menu after deletion
+      // Call the callback to refresh the data
+      if (onProblemDeleted) {
+        onProblemDeleted(problem.id)
+      }
+    } catch (error) {
+      console.error("Failed to delete problem:", error)
+    }
+  }, [problem?.id, onDeleteProblem, onProblemDeleted])
+
   return (
     <>
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
@@ -140,7 +154,20 @@ const ActionsDropdown = React.memo(({ problem }) => {
             <>
               <DropdownMenuItem>Edit</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+              <DropdownMenuItem 
+                variant="destructive" 
+                onClick={handleDeleteProblem}
+                disabled={isDeletingProblem}
+              >
+                {isDeletingProblem ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Deleting...
+                  </>
+                ) : (
+                  "Delete"
+                )}
+              </DropdownMenuItem>
             </>
           )}
         </DropdownMenuContent>
@@ -257,7 +284,7 @@ const CompanyCell = React.memo(({ company }) => (
 CompanyCell.displayName = "CompanyCell"
 
 // Memoized column definitions with solved problems logic
-const useColumns = (solvedProblems) =>
+const useColumns = (solvedProblems, onProblemDeleted) =>
   React.useMemo(
     () => [
       {
@@ -319,10 +346,10 @@ const useColumns = (solvedProblems) =>
       },
       {
         id: "actions",
-        cell: ({ row }) => <ActionsDropdown problem={row.original} />,
+        cell: ({ row }) => <ActionsDropdown problem={row.original} onProblemDeleted={onProblemDeleted} />,
       },
     ],
-    [JSON.stringify(solvedProblems)],
+    [JSON.stringify(solvedProblems), onProblemDeleted],
   )
 
 // Custom hook for filter logic
@@ -417,7 +444,7 @@ const FilterSummary = React.memo(({ searchTerm, companyFilter, difficultyFilter,
 
 FilterSummary.displayName = "FilterSummary"
 
-export function DataTable({ data: initialData, solvedProblems = [] }) {
+export function DataTable({ data: initialData, solvedProblems = [], onProblemDeleted }) {
   // Extract solved problem IDs from the data structure
   const solvedProblemIds = React.useMemo(() => {
     if (!initialData) return []
@@ -434,7 +461,8 @@ export function DataTable({ data: initialData, solvedProblems = [] }) {
 
     return Array.from(solvedIds)
   }, [initialData, solvedProblems])
-  const columns = useColumns(solvedProblemIds)
+  
+  const columns = useColumns(solvedProblemIds, onProblemDeleted)
 
   const {
     searchTerm,

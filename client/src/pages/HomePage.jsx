@@ -12,6 +12,12 @@ export default function HomePage() {
     console.log(problems);
   }, [getAllProblems]);
 
+  // Add this callback function
+  const handleProblemDeleted = (deletedId) => {
+    // Refetch all problems to ensure data is up to date
+    getAllProblems();
+  };
+
   if (isProblemsLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -19,13 +25,15 @@ export default function HomePage() {
       </div>
     );
   }
+
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-          <SectionCards />
-          <div className="px-4 lg:px-6"></div>
-          <DataTable data={problems} />
+          <DataTable 
+            data={problems} 
+            onProblemDeleted={handleProblemDeleted} // Add this prop
+          />
         </div>
       </div>
     </div>

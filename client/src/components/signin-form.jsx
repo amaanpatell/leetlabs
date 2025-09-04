@@ -150,7 +150,7 @@ export function SignInForm({ className, ...props }) {
               Or
             </span>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
+          {/* <div className="grid gap-4 sm:grid-cols-2">
             <Button variant="outline" type="button" className="w-full cursor-pointer">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                 <path
@@ -169,7 +169,7 @@ export function SignInForm({ className, ...props }) {
               </svg>
               Continue with Google
             </Button>
-          </div>
+          </div> */}
         </div>
       </form>
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">

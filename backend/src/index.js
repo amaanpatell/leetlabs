@@ -1,5 +1,5 @@
+import "dotenv/config";
 import express, { urlencoded } from "express";
-import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
@@ -10,16 +10,16 @@ import executionRoute from "./routes/executeCode.routes.js";
 import submissionRoutes from "./routes/submission.routes.js";
 import playlistRoutes from "./routes/playlist.routes.js";
 
-dotenv.config({
-  path: "./.env",
-});
-
 const app = express();
 const PORT = process.env.PORT || 4000;
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: [
+      "http://localhost:5173",
+      "https://leetlabs.space", // add this
+      "https://www.leetlabs.space",
+    ],
     credentials: true,
   }),
 );
@@ -38,6 +38,6 @@ app.use("/api/v1/submission", submissionRoutes);
 app.use("/api/v1/playlist", playlistRoutes);
 app.use(errorHandler);
 
-app.listen(process.env.PORT, () => {
+app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

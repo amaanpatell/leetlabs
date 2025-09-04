@@ -128,9 +128,9 @@ const SubmissionsList = ({ submissions }) => {
           All Submissions
         </h2>
 
-        <div className="rounded-md border">
+        <div className="rounded-lg border">
           <Table>
-            <TableHeader className="bg-muted ">
+            <TableHeader className="bg-muted rounded-lg">
               <TableRow>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-center">Language</TableHead>

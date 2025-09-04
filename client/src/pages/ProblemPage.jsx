@@ -20,6 +20,8 @@ import {
   Tags,
   Tag,
   Building,
+  Lock,
+  Loader,
 } from "lucide-react";
 import {
   Select,
@@ -44,7 +46,6 @@ import { getLanguageId } from "../utils/lang";
 import { useExecutionStore } from "../store/useExecutionStore";
 import { useSubmissionStore } from "../store/useSubmissionStore";
 import SubmissionsList from "@/components/SubmissionList";
-import Timer from "@/components/Timer";
 
 export default function ProblemPage() {
   // State management
@@ -62,8 +63,8 @@ export default function ProblemPage() {
   const [code, setCode] = useState("");
   const [activeTab, setActiveTab] = useState("description");
   const [selectedLanguage, setSelectedLanguage] = useState("JAVASCRIPT");
-  const [isBookmarked, setIsBookmarked] = useState(false);
   const [testCases, setTestCases] = useState([]);
+  const [isCopied, setIsCopied] = useState(false);
   const { executeCode, submission, isExecuting } = useExecutionStore();
   const [selectedTest, setSelectedTest] = useState(0);
   const [isExpanded, setIsExpanded] = useState(true);
@@ -152,6 +153,16 @@ export default function ProblemPage() {
     setCode(problem.codeSnippets?.[lang] || "");
   };
 
+  const handleCopyClick = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setIsCopied(true);
+
+    // Hide the message after 2 seconds
+    setTimeout(() => {
+      setIsCopied(false);
+    }, 2000);
+  };
+
   // Handle code execution
   const handleRunCode = (e) => {
     e.preventDefault();
@@ -182,11 +193,8 @@ export default function ProblemPage() {
 
   if (isProblemLoading || !problem) {
     return (
-      <div className="flex items-center justify-center h-screen bg-base-200">
-        <div className="card bg-base-100 p-8 shadow-xl">
-          <span className="loading loading-spinner loading-lg text-primary"></span>
-          <p className="mt-4 text-base-content/70">Loading problem...</p>
-        </div>
+      <div className="flex items-center justify-center h-full">
+        <Loader />
       </div>
     );
   }
@@ -305,16 +313,14 @@ export default function ProblemPage() {
               <AccordionItem value="item-1">
                 <AccordionTrigger>
                   <div className="flex justify-center items-center gap-2">
-                    <Tags />
+                    <Tags className="w-4 h-4 text-slate-400" />
                     Topics
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="flex flex-col gap-4 text-balance">
-                  {problem.status && (
+                  {problem.tags && (
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Tag className="w-4 h-4 text-slate-400" />
-                      <span className="text-sm text-slate-400">Topics:</span>
-                      {problem.status.map((topic) => (
+                      {problem.tags.map((topic) => (
                         <Badge
                           key={topic}
                           variant="secondary"
@@ -331,13 +337,17 @@ export default function ProblemPage() {
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-2">
-                <AccordionTrigger>Company</AccordionTrigger>
+                <AccordionTrigger>
+                  <div className="flex justify-center items-center gap-2">
+                    <Building className="w-4 h-4 text-slate-400" />
+                    Company
+                  </div>
+                </AccordionTrigger>
                 <AccordionContent className="flex flex-col gap-4 text-balance">
-                  {problem.companies && (
+                  {problem.company && (
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Building className="w-4 h-4 text-slate-400" />
                       <span className="text-sm text-slate-400">Companies:</span>
-                      {problem.companies.map((company) => (
+                      {problem.company.map((company) => (
                         <Badge
                           key={company}
                           variant="secondary"
@@ -351,18 +361,27 @@ export default function ProblemPage() {
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-3">
-                <AccordionTrigger>Return Policy</AccordionTrigger>
+                <AccordionTrigger>
+                  <div className="flex justify-center items-center gap-2 ">
+                    <Lock className="w-4 h-4 text-slate-400" />
+                    Hint
+                  </div>
+                </AccordionTrigger>
                 <AccordionContent className="flex flex-col gap-4 text-balance">
-                  <p>
-                    We stand behind our products with a comprehensive 30-day
-                    return policy. If you&apos;re not completely satisfied,
-                    simply return the item in its original condition.
-                  </p>
-                  <p>
-                    Our hassle-free return process includes free return shipping
-                    and full refunds processed within 48 hours of receiving the
-                    returned item.
-                  </p>
+                  {problem.hints && (
+                    <div className="flex items-center gap-2 flex-wrap ">
+                      <span className="text-sm text-slate-400">Hint:</span>
+                      {problem.hints.map((hint) => (
+                        <Badge
+                          key={hint}
+                          variant="secondary"
+                          className="bg-slate-800 text-slate-300 border-slate-600 text-xs"
+                        >
+                          {hint}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
@@ -406,21 +425,6 @@ export default function ProblemPage() {
         return (
           <div className="text-center text-muted-foreground py-8">
             No discussions yet
-          </div>
-        );
-
-      case "hints":
-        return (
-          <div className="space-y-4">
-            {problem?.hints ? (
-              <div className="bg-muted p-4 rounded-lg text-foreground">
-                {problem.hints}
-              </div>
-            ) : (
-              <div className="text-center text-muted-foreground py-8">
-                No hints available
-              </div>
-            )}
           </div>
         );
 
@@ -473,26 +477,35 @@ export default function ProblemPage() {
             <Play className="w-4 h-4 mr-1" />
             {isExecuting ? "Loading..." : "Submit"}
           </Button>
-          <Timer />
         </div>
         <div className="flex items-center justify-center gap-3 pr-2">
           <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-9 px-4 py-2 has-[>svg]:px-3 -mr-4">
-            🔥 5
+            🔥1
           </button>
 
           <button
             className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 h-9 px-4 py-2 has-[>svg]:px-3 -mr-4"
-            onClick={() => navigator.clipboard.writeText(window.location.href)}
+            onClick={handleCopyClick}
             title="Copy problem link"
           >
             <Share className="w-4 h-4" />
           </button>
+          {isCopied && (
+            <span className="text-sm font-medium ml-2">URL Copied!</span>
+          )}
         </div>
       </div>
 
       <div className="flex h-[calc(93vh-60px)]">
         {/* Left Panel */}
-        <div className="w-1/2 border-slate-700 overflow-auto">
+        <div
+          className="w-1/2  border-slate-700 overflow-auto 
+        [&::-webkit-scrollbar]:w-2
+  [&::-webkit-scrollbar-track]:bg-gray-100
+  [&::-webkit-scrollbar-thumb]:bg-gray-300
+  dark:[&::-webkit-scrollbar-track]:bg-neutral-700
+  dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500 "
+        >
           {/* Problem Navigation */}
           <div className="flex gap-3 p-2 ">
             <Button
@@ -504,7 +517,7 @@ export default function ProblemPage() {
               }`}
               onClick={() => setActiveTab("description")}
             >
-              <FileText className="w-4 h-4"/>
+              <FileText className="w-4 h-4" />
               Description
             </Button>
             <Button
@@ -530,18 +543,6 @@ export default function ProblemPage() {
             >
               <MessageSquare className="w-4 h-4" />
               Discussion
-            </Button>
-            <Button
-              variant="ghost"
-              className={`px-4 py-2 rounded text-sm font-medium ${
-                activeTab === "hints"
-                  ? "bg-primary text-primary-foreground"
-                  : " text-secondary-foreground hover:bg-secondary/80"
-              }`}
-              onClick={() => setActiveTab("hints")}
-            >
-              <Lightbulb className="w-4 h-4" />
-              Hints
             </Button>
           </div>
 
