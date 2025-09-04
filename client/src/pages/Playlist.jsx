@@ -5,14 +5,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -23,9 +15,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import {
   ChevronDown,
   ChevronUp,
@@ -34,8 +23,6 @@ import {
   Target,
   Trophy,
   Clock,
-  CheckCircle,
-  XCircle,
   AlertCircle,
   Trash2,
   MoreVertical,
@@ -44,6 +31,7 @@ import {
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { usePlaylistStore } from "@/store/usePlaylistStore"
+import CreatePlaylistDialog from "@/components/CreatePlaylistDialog"
 
 // Utility functions
 const getDifficultyColor = (difficulty) => {
@@ -130,7 +118,6 @@ const ProblemItem = ({ problem, playlistId, onSolve, onRemove, isRemoving }) => 
       }`}
     >
       <div className="flex items-center gap-3">
-        {/* {getStatusIcon(normalizedStatus)} */}
         <div className="flex-1">
           <p
             className="font-medium text-foreground hover:text-primary transition-colors cursor-pointer"
@@ -226,7 +213,6 @@ export default function PlaylistPage() {
     currentPlaylist,
     isLoading,
     error,
-    createPlaylist,
     getAllPlaylists,
     getPlaylistDetails,
     removeProblemFromPlaylist,
@@ -235,10 +221,7 @@ export default function PlaylistPage() {
 
   const [expandedPlaylist, setExpandedPlaylist] = useState(null)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const [newPlaylist, setNewPlaylist] = useState({ name: "", description: "" })
   const [deletingPlaylistId, setDeletingPlaylistId] = useState(null)
-  const [isCreating, setIsCreating] = useState(false)
-  const [formErrors, setFormErrors] = useState({})
   const [removingProblemId, setRemovingProblemId] = useState(null)
 
   const navigate = useNavigate()
@@ -263,40 +246,6 @@ export default function PlaylistPage() {
 
   const toggleExpand = async (playlistId) => {
     setExpandedPlaylist(expandedPlaylist === playlistId ? null : playlistId)
-  }
-
-  const validateForm = () => {
-    const errors = {}
-    if (!newPlaylist.name?.trim()) {
-      errors.name = "Playlist name is required"
-    } else if (newPlaylist.name.trim().length < 3) {
-      errors.name = "Playlist name must be at least 3 characters long"
-    }
-    if (newPlaylist.description?.length > 500) {
-      errors.description = "Description must be less than 500 characters"
-    }
-    setFormErrors(errors)
-    return Object.keys(errors).length === 0
-  }
-
-  const handleCreatePlaylist = async () => {
-    if (!validateForm()) return
-
-    setIsCreating(true)
-    try {
-      await createPlaylist({
-        name: newPlaylist.name.trim(),
-        description: newPlaylist.description.trim(),
-      })
-
-      setNewPlaylist({ name: "", description: "" })
-      setFormErrors({})
-      setIsCreateDialogOpen(false)
-    } catch (error) {
-      console.error("Failed to create playlist:", error)
-    } finally {
-      setIsCreating(false)
-    }
   }
 
   const handleDeletePlaylist = async (playlistId) => {
@@ -334,14 +283,6 @@ export default function PlaylistPage() {
     }
   }
 
-  const handleDialogClose = (open) => {
-    if (!open && !isCreating) {
-      setIsCreateDialogOpen(false)
-      setNewPlaylist({ name: "", description: "" })
-      setFormErrors({})
-    }
-  }
-
   const stats = {
     totalProblems: playlist.reduce((acc, pl) => acc + (pl.problems?.length || 0), 0),
     avgProgress:
@@ -354,7 +295,7 @@ export default function PlaylistPage() {
     return (
       <div className="min-h-screen bg-background p-6 flex items-center justify-center">
         <div className="flex items-center gap-2">
-        <Loader className="size-10 animate-spin" />
+          <Loader className="size-10 animate-spin" />
           <span>Loading playlists...</span>
         </div>
       </div>
@@ -371,86 +312,11 @@ export default function PlaylistPage() {
             <p className="text-muted-foreground text-lg">Organize and track your coding practice</p>
           </div>
 
-          <Dialog open={isCreateDialogOpen} onOpenChange={handleDialogClose}>
-            <DialogTrigger asChild>
-              <Button
-                className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                disabled={isLoading || deletingPlaylistId}
-                onClick={() => setIsCreateDialogOpen(true)}
-              >
-                <Plus className="h-4 w-4" />
-                Create New Playlist
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Create New Playlist</DialogTitle>
-                <DialogDescription>Create a custom playlist to organize your coding problems</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">
-                    Playlist Name <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="name"
-                    value={newPlaylist.name}
-                    onChange={(e) => {
-                      setNewPlaylist({ ...newPlaylist, name: e.target.value })
-                      if (formErrors.name) setFormErrors({ ...formErrors, name: undefined })
-                    }}
-                    placeholder="Enter playlist name"
-                    className={formErrors.name ? "border-red-500" : ""}
-                    disabled={isCreating}
-                  />
-                  {formErrors.name && <p className="text-sm text-red-500">{formErrors.name}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={newPlaylist.description}
-                    onChange={(e) => {
-                      setNewPlaylist({
-                        ...newPlaylist,
-                        description: e.target.value,
-                      })
-                      if (formErrors.description)
-                        setFormErrors({
-                          ...formErrors,
-                          description: undefined,
-                        })
-                    }}
-                    placeholder="Describe your playlist (optional)"
-                    rows={3}
-                    className={formErrors.description ? "border-red-500" : ""}
-                    disabled={isCreating}
-                    maxLength={500}
-                  />
-                  {formErrors.description && <p className="text-sm text-red-500">{formErrors.description}</p>}
-                  <p className="text-xs text-muted-foreground">{newPlaylist.description.length}/500 characters</p>
-                </div>
-                <div className="flex justify-end gap-2 pt-4">
-                  <Button variant="outline" onClick={() => handleDialogClose(false)} disabled={isCreating}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleCreatePlaylist} disabled={isCreating || !newPlaylist.name.trim()}>
-                    {isCreating ? (
-                      <>
-                        <Loader className="h-4 w-4 animate-spin" />
-                        Creating...
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="h-4 w-4" />
-                        Create Playlist
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </DialogContent>
-          </Dialog>
+          <CreatePlaylistDialog
+            isOpen={isCreateDialogOpen}
+            onOpenChange={setIsCreateDialogOpen}
+            disabled={isLoading || deletingPlaylistId}
+          />
         </div>
 
         {/* Error Display */}
@@ -610,6 +476,7 @@ export default function PlaylistPage() {
           })}
         </div>
 
+        {/* Empty State */}
         {playlist.length === 0 && !isLoading && (
           <div className="text-center py-12">
             <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -617,10 +484,11 @@ export default function PlaylistPage() {
             <p className="text-muted-foreground mb-4">
               Create your first playlist to start organizing your coding problems
             </p>
-            <Button onClick={() => setIsCreateDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Your First Playlist
-            </Button>
+            <CreatePlaylistDialog
+              isOpen={false}
+              onOpenChange={() => {}}
+              triggerButton={true}
+            />
           </div>
         )}
       </div>

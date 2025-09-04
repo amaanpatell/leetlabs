@@ -47,6 +47,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { usePlaylistStore } from "@/store/usePlaylistStore"
 import { Loader2 } from "lucide-react"
+import CreatePlaylistDialog from "./CreatePlaylistDialog"
 
 export const schema = z.object({
   id: z.number(),
@@ -86,11 +87,11 @@ DifficultyCell.displayName = "DifficultyCell"
 const ActionsDropdown = React.memo(({ problem, onProblemDeleted }) => {
   const { authUser } = useAuthStore()
   const { playlist, isLoading, getAllPlaylists, addProblemToPlaylist } = usePlaylistStore()
-  const { onDeleteProblem, isDeletingProblem } = useActions() // Add this line
+  const { onDeleteProblem, isDeletingProblem } = useActions()
 
   const [isPlaylistSelectionOpen, setIsPlaylistSelectionOpen] = React.useState(false)
   const [selectedPlaylist, setSelectedPlaylist] = React.useState("")
-  const [menuOpen, setMenuOpen] = React.useState(false) // added controlled open state
+  const [menuOpen, setMenuOpen] = React.useState(false)
 
   const validPlaylists = React.useMemo(() => {
     if (!playlist || !Array.isArray(playlist)) return []
@@ -98,7 +99,7 @@ const ActionsDropdown = React.memo(({ problem, onProblemDeleted }) => {
   }, [playlist])
 
   const handleDialogOpen = React.useCallback(() => {
-    setMenuOpen(false) // ensure dropdown closes before dialog opens
+    setMenuOpen(false)
     setIsPlaylistSelectionOpen(true)
     if (!playlist || playlist.length === 0) {
       getAllPlaylists()
@@ -109,7 +110,7 @@ const ActionsDropdown = React.memo(({ problem, onProblemDeleted }) => {
     setIsPlaylistSelectionOpen(open)
     if (!open) {
       setSelectedPlaylist("")
-      setMenuOpen(false) // ensure menu is closed on dialog close
+      setMenuOpen(false)
     }
   }, [])
 
@@ -119,7 +120,7 @@ const ActionsDropdown = React.memo(({ problem, onProblemDeleted }) => {
       await addProblemToPlaylist(selectedPlaylist, problem.id)
       setIsPlaylistSelectionOpen(false)
       setSelectedPlaylist("")
-      setMenuOpen(false) // also close menu after successful add
+      setMenuOpen(false)
     } catch (error) {
       console.error("Failed to add problem to playlist:", error)
     }
@@ -129,8 +130,7 @@ const ActionsDropdown = React.memo(({ problem, onProblemDeleted }) => {
     if (!problem?.id) return
     try {
       await onDeleteProblem(problem.id)
-      setMenuOpen(false) // close menu after deletion
-      // Call the callback to refresh the data
+      setMenuOpen(false)
       if (onProblemDeleted) {
         onProblemDeleted(problem.id)
       }
@@ -138,6 +138,11 @@ const ActionsDropdown = React.memo(({ problem, onProblemDeleted }) => {
       console.error("Failed to delete problem:", error)
     }
   }, [problem?.id, onDeleteProblem, onProblemDeleted])
+
+  // Handle playlist creation success - refresh playlists but keep dialog open
+  const handlePlaylistCreated = React.useCallback(() => {
+    getAllPlaylists() // Refresh the playlists to include the new one
+  }, [getAllPlaylists])
 
   return (
     <>
@@ -179,6 +184,11 @@ const ActionsDropdown = React.memo(({ problem, onProblemDeleted }) => {
             <DialogHeader>
               <DialogTitle>Add to Playlist</DialogTitle>
               <DialogDescription>Choose a playlist to add "{problem?.title || "this problem"}" to.</DialogDescription>
+              {/* Pass the callback to handle successful playlist creation */}
+              <CreatePlaylistDialog 
+                triggerButton={true}
+                onPlaylistCreated={handlePlaylistCreated} 
+              />
             </DialogHeader>
 
             <div className="grid gap-4 py-4">
@@ -481,12 +491,13 @@ export function DataTable({ data: initialData, solvedProblems = [], onProblemDel
   } = useFilters(initialData)
 
   // Table state - removed rowSelection as it's now controlled by solvedProblems
+  // Changed default pageSize to 19
   const [columnVisibility, setColumnVisibility] = React.useState({})
   const [columnFilters, setColumnFilters] = React.useState([])
   const [sorting, setSorting] = React.useState([])
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 19, // Changed from 10 to 19
   })
 
   // Create row selection state based on solved problems
@@ -686,32 +697,13 @@ export function DataTable({ data: initialData, solvedProblems = [], onProblemDel
           </div>
         </div>
 
-        {/* Pagination controls */}
+        {/* Pagination controls - Removed page size selection */}
         <div className="flex items-center justify-between px-4">
           <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
             {solvedProblemsCount} of {table.getFilteredRowModel().rows.length} problem(s) solved.
           </div>
           <div className="flex w-full items-center gap-8 lg:w-fit">
-            <div className="hidden items-center gap-2 lg:flex">
-              <Label htmlFor="rows-per-page" className="text-sm font-medium">
-                Rows per page
-              </Label>
-              <Select
-                value={`${table.getState().pagination.pageSize}`}
-                onValueChange={(value) => table.setPageSize(Number(value))}
-              >
-                <SelectTrigger size="sm" className="w-20" id="rows-per-page">
-                  <SelectValue placeholder={table.getState().pagination.pageSize} />
-                </SelectTrigger>
-                <SelectContent side="top">
-                  {[10, 20, 30, 40, 50].map((pageSize) => (
-                    <SelectItem key={pageSize} value={`${pageSize}`}>
-                      {pageSize}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Removed the page size selection section */}
             <div className="flex w-fit items-center justify-center text-sm font-medium">
               Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
             </div>
