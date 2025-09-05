@@ -44,7 +44,7 @@ export function NavUser({ user }) {
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
                 <AvatarImage src={authUser?.avatar} alt={authUser?.name} />
-                <AvatarFallback className="rounded-lg"> {authUser.name
+                <AvatarFallback className="rounded-lg"> {authUser?.name
                     .split(" ")
                     .map((n) => n[0])
                     .join("")}</AvatarFallback>
