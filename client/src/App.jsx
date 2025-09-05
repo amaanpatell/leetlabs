@@ -19,6 +19,7 @@ import AdminRoute from "./components/AdminRoute";
 import { ThemeProvider } from "./components/Theme-provider";
 import PlaylistPage from "./pages/Playlist";
 import ProfilePage from "./pages/Profile";
+import PrivateRoute from "./PrivateRoute";
 
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -67,38 +68,63 @@ const App = () => {
 
       <Routes>
         <Route path="/" element={<Navbar />}>
-          <Route
-            index
-            element={authUser ? <Dashboard /> : <Navigate to="/login" />}
-          />
+  <Route
+    index
+    element={
+      <PrivateRoute>
+        <Dashboard />
+      </PrivateRoute>
+    }
+  />
 
-          <Route
-            path="problem"
-            element={authUser ? <HomePage /> : <Navigate to="/login" />}
-          />
+  <Route
+    path="problem"
+    element={
+      <PrivateRoute>
+        <HomePage />
+      </PrivateRoute>
+    }
+  />
 
-          <Route
-            path="profile"
-            element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
-          />
+  <Route
+    path="profile"
+    element={
+      <PrivateRoute>
+        <ProfilePage />
+      </PrivateRoute>
+    }
+  />
 
-          <Route
-            path="playlist"
-            element={authUser ? <PlaylistPage /> : <Navigate to="/login" />}
-          />
+  <Route
+    path="playlist"
+    element={
+      <PrivateRoute>
+        <PlaylistPage />
+      </PrivateRoute>
+    }
+  />
 
-          <Route
-            path="problem/:id"
-            element={authUser ? <ProblemPage /> : <Navigate to="/login" />}
-          />
+  <Route
+    path="problem/:id"
+    element={
+      <PrivateRoute>
+        <ProblemPage />
+      </PrivateRoute>
+    }
+  />
 
-          <Route element={<AdminRoute />}>
-            <Route
-              path="add-problem"
-              element={authUser ? <AddProblem /> : <Navigate to="/login" />}
-            />
-          </Route>
-        </Route>
+  <Route element={<AdminRoute />}>
+    <Route
+      path="add-problem"
+      element={
+        <PrivateRoute>
+          <AddProblem />
+        </PrivateRoute>
+      }
+    />
+  </Route>
+</Route>
+
 
         <Route
           path="signup"
