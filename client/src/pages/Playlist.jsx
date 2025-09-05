@@ -344,7 +344,7 @@ export default function PlaylistPage() {
             icon={Trophy}
             borderColor="border-l-blue-500 border-t-blue-500 border-3"
           />
-          <StatsCard title="Active Streaks" value={7} icon={Clock} borderColor="border-l-orange-500 border-t-orange-500 border-3" />
+          <StatsCard title="Active Streaks" value={0} icon={Clock} borderColor="border-l-orange-500 border-t-orange-500 border-3" />
         </div>
 
         {/* Playlists Grid */}

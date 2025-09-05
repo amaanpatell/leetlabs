@@ -7,24 +7,41 @@ import { User, Trophy, Target, Code, CheckCircle, Clock, Star, TrendingUp, Award
 import { useAuthStore } from "@/store/useAuthStore"
 import { useSubmissionStore } from "@/store/useSubmissionStore"
 import { useState, useEffect } from "react"
+import { useProblemStore } from "@/store/useProblemStore"
 
 const ProfilePage = () => {
   const { authUser } = useAuthStore()
   const { submissions, getAllSubmissions, isLoading } = useSubmissionStore()
+  const { problems, getAllProblems } = useProblemStore()
   
   const [userData, setUserData] = useState({
     name: authUser?.name || "",
     email: authUser?.email || "",
     role: authUser?.role || "user",
-    currentStreak: 15,
+    currentStreak: 0,
     ranking: 12847,
     reputation: 1250,
   });
 
-  // Fetch submissions when component mounts
+  // Create a mapping of problem IDs to problem titles
+  const [problemTitleMap, setProblemTitleMap] = useState({});
+
+  // Fetch submissions and problems when component mounts
   useEffect(() => {
     getAllSubmissions()
-  }, [getAllSubmissions])
+    getAllProblems() // Fetch all problems to get the titles
+  }, [getAllSubmissions, getAllProblems])
+
+  // Create problem title mapping when problems are loaded
+  useEffect(() => {
+    if (problems && problems.length > 0) {
+      const titleMap = {}
+      problems.forEach(problem => {
+        titleMap[problem.id] = problem.title
+      })
+      setProblemTitleMap(titleMap)
+    }
+  }, [problems])
 
   // Calculate stats from real submission data
   const calculateUserStats = () => {
@@ -85,15 +102,10 @@ const ProfilePage = () => {
       }))
   }
 
-  // Helper function to get problem title (placeholder)
+  // Helper function to get problem title using the mapping
   const getSubmissionTitle = (problemId) => {
-    // In a real app, you'd maintain a mapping of problemId to problem title
-    const problemTitles = {
-      "7cdf2ed1-193e-4270-ad07-d0f5f457fd98": "Climbing Stairs",
-      "045d4c49-4b8d-41bb-8256-4e07c1461fc4": "Add Two Numbers",
-      "88673114-761d-4244-964d-316aeb644724": "Multiply Two Numbers"
-    }
-    return problemTitles[problemId] || "Problem"
+    // Use the problem title mapping, fallback to "Unknown Problem" if not found
+    return problemTitleMap[problemId] || "Unknown Problem"
   }
 
   // Helper function to calculate time ago
@@ -151,7 +163,7 @@ const ProfilePage = () => {
         title: "JavaScript Master", 
         description: "All submissions in JavaScript", 
         icon: "🌟", 
-        earned: submissions.every(sub => sub.language === "JAVASCRIPT") && submissions.length > 0
+        earned: submissions.length > 0 && submissions.every(sub => sub.language === "JAVASCRIPT")
       },
       { 
         id: 6, 
