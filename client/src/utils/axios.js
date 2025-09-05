@@ -7,3 +7,13 @@ export const axiosInstance = axios.create({
       : "/api/v1",
   withCredentials: true,
 });
+
+axiosInstance.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (err.response && err.response.status === 401) {
+      window.location.href = "/login"; // redirect globally
+    }
+    return Promise.reject(err);
+  }
+);
