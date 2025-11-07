@@ -35,7 +35,6 @@ export function SignInForm({ className, ...props }) {
   const onSubmit = async (data) => {
     try {
       await signup(data); // your auth logic here
-      console.log("signup Data:", data);
     } catch (error) {
       console.error("signup failed:", error);
     }
@@ -53,9 +52,9 @@ export function SignInForm({ className, ...props }) {
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                 <Code className="size-6" />
               </div>
-              <span className="sr-only">Coding Buddy.</span>
+              <span className="sr-only">LeetLabs.</span>
             </a>
-            <h1 className="text-xl font-bold">Welcome to Coding Buddy.</h1>
+            <h1 className="text-xl font-bold">Welcome to LeetLabs.</h1>
             <div className="text-center text-sm">
               Already have an account?{" "}
               <Link to="/login" className="underline underline-offset-4">

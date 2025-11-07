@@ -33,9 +33,6 @@ export const executeCode = asyncHandler(async (req, res) => {
   const tokens = submissionResults.map((res) => res.token);
   const results = await pollBatchResults(tokens);
 
-  console.log("Results--------------");
-  console.log(results);
-
   let allPassed = true;
   const detailedResults = results.map((result, i) => {
     const stdout = result.stdout?.trim();
@@ -57,7 +54,6 @@ export const executeCode = asyncHandler(async (req, res) => {
     };
   });
 
-  console.log(detailedResults);
 
   // store submission summary
   const submission = await db.submission.create({
@@ -86,7 +82,6 @@ export const executeCode = asyncHandler(async (req, res) => {
     },
   });
 
-  console.log(submission, "this is submission db");
 
   // If All passed = true mark problem as solved for the current user
   if (allPassed) {
@@ -119,7 +114,6 @@ export const executeCode = asyncHandler(async (req, res) => {
     time: result.time,
   }));
 
-  console.log(testCaseResults, "This is test case result");
 
   await db.testCaseResult.createMany({
     data: testCaseResults,

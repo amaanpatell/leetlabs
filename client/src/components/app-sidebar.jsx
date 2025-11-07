@@ -73,7 +73,7 @@ export function AppSidebar({ ...props }) {
                   <Code className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Coding Buddy</span>
+                  <span className="truncate font-semibold">LeetLabs</span>
                   <span className="truncate text-xs">Coding Challenge</span>
                 </div>
               </Link>

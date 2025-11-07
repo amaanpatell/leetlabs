@@ -13,7 +13,6 @@ export const useProblemStore = create((set) => ({
     set({ isProblemsLoading: true });
     try {
       const response = await axiosInstance.get("/problems/get-all-problems");
-      console.log("Fetched problems:", response.data.data);
       set({ problems: response.data.data, isProblemsLoading: false });
     } catch (error) {
       console.error("Error fetching problems:", error);

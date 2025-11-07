@@ -674,7 +674,6 @@ const CreateProblemForm = () => {
         }
 
         // Remove noisy debug logs
-        // console.log("Form submitted:", values)
 
         const res = await axiosInstance.post("/problems/create-problem", payload)
         toast.success(res.data.message || "Problem Created successfully⚡")

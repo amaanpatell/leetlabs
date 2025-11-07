@@ -187,7 +187,6 @@ export default function ProblemPage() {
       const expected_outputs = problem.testCases.map((tc) => tc.output);
       executeCode(code, language_id, stdin, expected_outputs, id);
     } catch (error) {
-      console.log("Error executing code", error);
     }
   };
 

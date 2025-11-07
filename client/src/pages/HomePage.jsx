@@ -9,7 +9,6 @@ export default function HomePage() {
 
   useEffect(() => {
     getAllProblems();
-    console.log(problems);
   }, [getAllProblems]);
 
   // Add this callback function

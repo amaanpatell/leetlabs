@@ -49,7 +49,6 @@ export const submitBatch = async (submissions) => {
     { submissions },
   );
 
-  console.log("Submission Results: ", data);
 
   return data; // [{token} , {token} , {token}]
 };

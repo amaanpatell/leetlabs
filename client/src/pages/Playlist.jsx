@@ -48,7 +48,6 @@ const isSolved = (problem) => {
   try {
     if (!problem) return false
     if (Array.isArray(problem?.userId) && problem.userId.length > 0) {
-      console.log(problem.userId)
       return true
     }
     if (typeof problem?.status === "string") {

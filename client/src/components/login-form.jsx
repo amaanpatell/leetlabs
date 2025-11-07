@@ -6,7 +6,6 @@ import { Link } from "react-router-dom";
 import { Code, Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 
-import { GalleryVerticalEnd } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -34,7 +33,6 @@ export function LoginForm({ className, ...props }) {
   const onSubmit = async (data) => {
     try {
       await login(data); // your auth logic here
-      console.log("Login Data:", data);
     } catch (error) {
       console.error("Login failed:", error);
     }
@@ -52,9 +50,9 @@ export function LoginForm({ className, ...props }) {
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                 <Code className="size-6" />
               </div>
-              <span className="sr-only">Coding Buddy Inc.</span>
+              <span className="sr-only">LeetLabs Inc.</span>
             </a>
-            <h1 className="text-xl font-bold">Welcome Back to Codding Buddy.</h1>
+            <h1 className="text-xl font-bold">Welcome Back to LeetLabs.</h1>
             <div className="text-center text-sm">
               Don&apos;t have an account?{" "}
               <Link to="/signup" className="underline underline-offset-4">
