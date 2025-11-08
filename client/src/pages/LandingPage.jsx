@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CodeBlock } from "@/components/ui/code-block";
 import { features, FooterLink, inputTypes } from "@/helper";
-import SupportedInputs from "@/helper/supportedInput";
 import {
   ArrowRight,
   Brain,
