@@ -64,55 +64,33 @@ const App = () => {
       />
 
       <Routes>
-        {/* Public Landing Page */}
+        {/* Public routes */}
         <Route path="/" element={<LandingPage />} />
-
-        {/* Authenticated area with Navbar */}
-        <Route path="/" element={<Navbar />}>
-          <Route
-            path="dashboard"
-            element={authUser ? <Dashboard /> : <Navigate to="/login" />}
-          />
-
-          <Route
-            path="problem"
-            element={authUser ? <HomePage /> : <Navigate to="/login" />}
-          />
-
-          <Route
-            path="profile"
-            element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
-          />
-
-          <Route
-            path="playlist"
-            element={authUser ? <PlaylistPage /> : <Navigate to="/login" />}
-          />
-
-          <Route
-            path="problem/:id"
-            element={authUser ? <ProblemPage /> : <Navigate to="/login" />}
-          />
-
-          <Route element={<AdminRoute />}>
-            <Route
-              path="add-problem"
-              element={authUser ? <AddProblem /> : <Navigate to="/login" />}
-            />
-          </Route>
-        </Route>
-
-        {/* Auth pages */}
         <Route
-          path="signup"
-          element={!authUser ? <SignUpPage /> : <Navigate to="/dashboard" />}
-        />
-        <Route
-          path="login"
+          path="/login"
           element={!authUser ? <LoginPage /> : <Navigate to="/dashboard" />}
         />
+        <Route
+          path="/signup"
+          element={!authUser ? <SignUpPage /> : <Navigate to="/dashboard" />}
+        />
 
-        {/* Catch all */}
+        {/*  Protected routes (show only when logged in) */}
+        {authUser && (
+          <Route path="/" element={<Navbar />}>
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="problem" element={<HomePage />} />
+            <Route path="profile" element={<ProfilePage />} />
+            <Route path="playlist" element={<PlaylistPage />} />
+            <Route path="problem/:id" element={<ProblemPage />} />
+
+            <Route element={<AdminRoute />}>
+              <Route path="add-problem" element={<AddProblem />} />
+            </Route>
+          </Route>
+        )}
+
+        {/* Fallback */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </ThemeProvider>
