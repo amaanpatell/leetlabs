@@ -242,7 +242,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/home/amaan-patel/code/leetlabs/backend/src/generated/prisma",
+      "value": "/home/amaanpatell/code/leetlabs/backend/src/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -256,12 +256,11 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/home/amaan-patel/code/leetlabs/backend/prisma/schema.prisma",
+    "sourceFilePath": "/home/amaanpatell/code/leetlabs/backend/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": null,
-    "schemaEnvPath": "../../../.env"
+    "rootEnvPath": null
   },
   "relativePath": "../../../prisma",
   "clientVersion": "6.7.0",
@@ -270,11 +269,12 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": true,
   "inlineDatasources": {
     "db": {
       "url": {
         "fromEnvVar": "DATABASE_URL",
-        "value": "postgresql://neondb_owner:npg_WEzR8UbFrJ3c@ep-broad-sound-a1el6udc-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+        "value": null
       }
     }
   },

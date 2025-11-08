@@ -16,6 +16,7 @@ import AdminRoute from "./components/AdminRoute";
 import { ThemeProvider } from "./components/Theme-provider";
 import PlaylistPage from "./pages/Playlist";
 import ProfilePage from "./pages/Profile";
+import LandingPage from "./pages/LandingPage";
 
 const App = () => {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -63,9 +64,13 @@ const App = () => {
       />
 
       <Routes>
+        {/* Public Landing Page */}
+        <Route path="/" element={<LandingPage />} />
+
+        {/* Authenticated area with Navbar */}
         <Route path="/" element={<Navbar />}>
           <Route
-            index
+            path="dashboard"
             element={authUser ? <Dashboard /> : <Navigate to="/login" />}
           />
 
@@ -97,16 +102,17 @@ const App = () => {
           </Route>
         </Route>
 
+        {/* Auth pages */}
         <Route
           path="signup"
-          element={!authUser ? <SignUpPage /> : <Navigate to="/" />}
+          element={!authUser ? <SignUpPage /> : <Navigate to="/dashboard" />}
         />
-        
         <Route
           path="login"
-          element={!authUser ? <LoginPage /> : <Navigate to="/" />}
+          element={!authUser ? <LoginPage /> : <Navigate to="/dashboard" />}
         />
 
+        {/* Catch all */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </ThemeProvider>

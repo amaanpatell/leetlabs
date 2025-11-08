@@ -41,11 +41,11 @@ export const registerUser = asyncHandler(async (req, res) => {
   const COOKIE_OPTIONS = {
     httpOnly: true,
     sameSite: "strict",
-    secure: process.env.NODE_ENV !== "development",
+    secure: true,
     maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
   };
 
-  res.cookie("jwt", token, COOKIE_OPTIONS);
+  res.cookie("LeetLabs", token, COOKIE_OPTIONS);
 
   
 
@@ -86,11 +86,11 @@ export const loginUser = asyncHandler(async (req, res) => {
   const COOKIE_OPTIONS = {
     httpOnly: true,
     sameSite: "strict",
-    secure: process.env.NODE_ENV !== "development",
+    secure: true,
     maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
   };
 
-  res.cookie("jwt", token, COOKIE_OPTIONS);
+  res.cookie("LeetLabs", token, COOKIE_OPTIONS);
 
   return res.status(200).json(
     new ApiResponse(
