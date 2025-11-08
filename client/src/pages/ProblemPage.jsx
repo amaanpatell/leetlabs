@@ -420,13 +420,6 @@ export default function ProblemPage() {
           </div>
         );
 
-      case "discussion":
-        return (
-          <div className="text-center text-muted-foreground py-8">
-            No discussions yet
-          </div>
-        );
-
       default:
         return null;
     }
@@ -530,18 +523,6 @@ export default function ProblemPage() {
             >
               <Code2 className="w-4 h-4" />
               Submissions
-            </Button>
-            <Button
-              variant="ghost"
-              className={`px-4 py-2 rounded text-sm font-medium ${
-                activeTab === "discussion"
-                  ? "bg-primary text-primary-foreground"
-                  : " text-secondary-foreground hover:bg-secondary/80"
-              }`}
-              onClick={() => setActiveTab("discussion")}
-            >
-              <MessageSquare className="w-4 h-4" />
-              Discussion
             </Button>
           </div>
 
