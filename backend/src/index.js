@@ -17,7 +17,7 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      "https://leetlabs.space", // add this
+      "https://leetlabs.space", 
       "https://www.leetlabs.space",
     ],
     credentials: true,

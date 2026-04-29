@@ -242,7 +242,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/home/amaanpatell/code/leetlabs/backend/src/generated/prisma",
+      "value": "/Users/amaanpatel/Developer/Code/leetlabs/backend/src/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -251,16 +251,17 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "debian-openssl-3.0.x",
+        "value": "darwin-arm64",
         "native": true
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/home/amaanpatell/code/leetlabs/backend/prisma/schema.prisma",
+    "sourceFilePath": "/Users/amaanpatel/Developer/Code/leetlabs/backend/prisma/schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": null
+    "rootEnvPath": null,
+    "schemaEnvPath": "../../../.env"
   },
   "relativePath": "../../../prisma",
   "clientVersion": "6.7.0",
